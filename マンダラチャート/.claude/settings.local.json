@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git config:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:serradas.org)",
+      "WebFetch(domain:cdnjs.cloudflare.com)"
+    ]
+  }
+}

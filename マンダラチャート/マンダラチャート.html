@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マンダラチャート - Mandala Chart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    /* ============================================
+       RESET & BASE
+       ============================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ============================================
+       HEADER
+       ============================================ */
+    .header {
+      text-align: center;
+      padding: 20px 16px 10px;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a2e;
+      letter-spacing: 2px;
+    }
+
+    .header p {
+      font-size: 13px;
+      color: #888;
+      margin-top: 4px;
+    }
+
+    /* ============================================
+       TOOLBAR
+       ============================================ */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 16px;
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toolbar input[type="text"] {
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      width: 200px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .toolbar input[type="text"]:focus {
+      border-color: #2196F3;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background: #2196F3;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #1976D2;
+    }
+
+    .btn-secondary {
+      background: #e0e0e0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background: #d0d0d0;
+    }
+
+    .btn-danger {
+      background: #ef5350;
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: #d32f2f;
+    }
+
+    .btn-success {
+      background: #4CAF50;
+      color: #fff;
+    }
+
+    .btn-success:hover {
+      background: #388E3C;
+    }
+
+    /* ============================================
+       COLOR PANEL
+       ============================================ */
+    .color-panel {
+      width: 100%;
+      max-width: 960px;
+      background: #fff;
+      border-radius: 10px;
+      padding: 16px;
+      margin: 0 16px 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: none;
+    }
+
+    .color-panel.visible {
+      display: block;
+    }
+
+    .color-panel h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+
+    .color-swatches {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .swatch label {
+      font-size: 11px;
+      color: #666;
+    }
+
+    .swatch input[type="color"] {
+      width: 36px;
+      height: 36px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      padding: 2px;
+    }
+
+    .preset-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .btn-preset {
+      padding: 4px 12px;
+      font-size: 12px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      background: #fafafa;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+
+    .btn-preset:hover {
+      background: #e8e8e8;
+    }
+
+    /* ============================================
+       MANDALA CHART - OUTER GRID
+       ============================================ */
+    .chart-container {
+      padding: 10px 16px 20px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .mandala-chart {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 5px;
+      width: min(92vw, 860px);
+      aspect-ratio: 1;
+      background: #444;
+      border-radius: 10px;
+      padding: 5px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    /* ============================================
+       BLOCK - INNER 3x3 GRID
+       ============================================ */
+    .block {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 2px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: #aaa;
+    }
+
+    /* ============================================
+       CELL (TEXTAREA)
+       ============================================ */
+    .cell {
+      width: 100%;
+      height: 100%;
+      border: none;
+      padding: 3px;
+      font-size: var(--cell-font-size, clamp(8px, 1.15vw, 13px));
+      text-align: center;
+      resize: none;
+      overflow: hidden;
+      font-family: 'Noto Sans JP', sans-serif;
+      line-height: 1.3;
+      background-color: var(--block-bg, #f5f5f5);
+      color: #333;
+      outline: none;
+      display: block;
+      cursor: text;
+      transition: box-shadow 0.15s;
+      word-break: break-all;
+      box-sizing: border-box;
+    }
+
+    .cell:focus {
+      box-shadow: inset 0 0 0 2px #2196F3;
+      z-index: 1;
+      position: relative;
+    }
+
+    .cell-main-goal {
+      background-color: #FFD700 !important;
+      font-weight: 700;
+      font-size: var(--main-goal-font-size, clamp(9px, 1.3vw, 15px));
+      color: #1a1a2e;
+    }
+
+    .cell-subgoal {
+      font-weight: 700;
+      background-color: var(--block-accent, #e0e0e0) !important;
+      color: #1a1a2e;
+    }
+
+    /* Center block sub-goals get special styling */
+    .block-center .cell-subgoal {
+      background-color: var(--center-subgoal-bg, #FFF176) !important;
+    }
+
+    /* ============================================
+       BLOCK COLORS (DEFAULT - OHTANI CLASSIC)
+       ============================================ */
+    .block-0 { --block-bg: #FFCDD2; --block-accent: #EF9A9A; }
+    .block-1 { --block-bg: #F8BBD0; --block-accent: #F48FB1; }
+    .block-2 { --block-bg: #E1BEE7; --block-accent: #CE93D8; }
+    .block-3 { --block-bg: #C5CAE9; --block-accent: #9FA8DA; }
+    .block-4 { --block-bg: #FFF9C4; --block-accent: #FFF176; --center-subgoal-bg: #FFF176; }
+    .block-5 { --block-bg: #B2DFDB; --block-accent: #80CBC4; }
+    .block-6 { --block-bg: #C8E6C9; --block-accent: #A5D6A7; }
+    .block-7 { --block-bg: #FFE0B2; --block-accent: #FFCC80; }
+    .block-8 { --block-bg: #B3E5FC; --block-accent: #81D4FA; }
+
+    /* ============================================
+       EXPORT OVERLAY (for html2canvas)
+       ============================================ */
+    .cell-wrapper {
+      position: relative;
+    }
+
+    .cell-export-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 3px;
+      font-family: 'Noto Sans JP', sans-serif;
+      line-height: 1.3;
+      word-break: break-all;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* ============================================
+       MODAL
+       ============================================ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .modal h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #1a1a2e;
+    }
+
+    .modal-close {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #888;
+      padding: 0 4px;
+    }
+
+    .modal-close:hover {
+      color: #333;
+    }
+
+    .chart-list {
+      list-style: none;
+    }
+
+    .chart-list-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border: 1px solid #eee;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+
+    .chart-list-item:hover {
+      background: #f5f5f5;
+    }
+
+    .chart-list-item .chart-info {
+      flex: 1;
+    }
+
+    .chart-list-item .chart-title {
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .chart-list-item .chart-date {
+      font-size: 11px;
+      color: #999;
+      margin-top: 2px;
+    }
+
+    .chart-list-item .chart-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-icon {
+      background: none;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.15s;
+    }
+
+    .btn-icon:hover {
+      background: #eee;
+    }
+
+    .btn-icon.delete:hover {
+      background: #ffebee;
+      border-color: #ef9a9a;
+    }
+
+    .save-dialog {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .save-dialog input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .save-dialog input:focus {
+      border-color: #2196F3;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: #999;
+      padding: 20px;
+      font-size: 14px;
+    }
+
+    /* ============================================
+       TOAST NOTIFICATION
+       ============================================ */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #333;
+      color: #fff;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      z-index: 2000;
+      opacity: 0;
+      transition: transform 0.3s, opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+    .footer {
+      text-align: center;
+      padding: 16px;
+      color: #aaa;
+      font-size: 12px;
+      margin-top: auto;
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .toolbar {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .toolbar input[type="text"] {
+        width: 100%;
+      }
+
+      .toolbar-group {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .color-swatches {
+        grid-template-columns: repeat(5, 1fr);
+      }
+
+      .cell {
+        font-size: var(--cell-font-size, clamp(7px, 2vw, 11px));
+        padding: 2px;
+      }
+
+      .cell-main-goal {
+        font-size: var(--main-goal-font-size, clamp(8px, 2.2vw, 13px));
+      }
+    }
+
+    @media (max-width: 500px) {
+      .chart-container {
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding: 10px 8px 20px;
+      }
+
+      .mandala-chart {
+        width: 500px;
+        min-width: 500px;
+      }
+
+      .color-swatches {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    /* ============================================
+       PRINT
+       ============================================ */
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .toolbar, .color-panel, .footer, .header p, .toast, .modal-overlay {
+        display: none !important;
+      }
+
+      .header {
+        padding: 10px 0;
+      }
+
+      .mandala-chart {
+        width: 100%;
+        max-width: 700px;
+        box-shadow: none;
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <h1>マンダラチャート</h1>
+    <p>Mandala Chart - Goal Setting Tool</p>
+  </header>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <input type="text" id="chart-title" placeholder="チャートタイトル">
+    </div>
+    <div class="toolbar-group">
+      <button class="btn btn-primary" onclick="saveChartAs()">保存</button>
+      <button class="btn btn-secondary" onclick="showLoadDialog()">読み込み</button>
+      <button class="btn btn-danger" onclick="clearChart()">クリア</button>
+    </div>
+    <div class="toolbar-group">
+      <button class="btn btn-success" onclick="exportAsImage()">PNG出力</button>
+      <button class="btn btn-success" onclick="exportAsPDF()">PDF出力</button>
+      <button class="btn btn-secondary" onclick="toggleColorPanel()">カラー設定</button>
+    </div>
+    <div class="toolbar-group">
+      <label for="font-size-slider" style="font-size:13px; white-space:nowrap;">文字サイズ:</label>
+      <input type="range" id="font-size-slider" min="6" max="20" value="12" step="1" style="width:100px; cursor:pointer;">
+      <span id="font-size-value" style="font-size:13px; min-width:36px; text-align:center;">12px</span>
+    </div>
+  </div>
+
+  <!-- Color Panel -->
+  <div id="color-panel" class="color-panel">
+    <h3>ブロックカラー設定</h3>
+    <div class="color-swatches" id="color-swatches"></div>
+    <h3>プリセットテーマ</h3>
+    <div class="preset-buttons">
+      <button class="btn-preset" onclick="applyPreset('ohtani')">大谷クラシック</button>
+      <button class="btn-preset" onclick="applyPreset('pastel')">パステル</button>
+      <button class="btn-preset" onclick="applyPreset('vivid')">ビビッド</button>
+      <button class="btn-preset" onclick="applyPreset('ocean')">オーシャン</button>
+      <button class="btn-preset" onclick="applyPreset('mono')">モノクロ</button>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-container">
+    <div id="mandala-chart" class="mandala-chart"></div>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">&times;</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    Inspired by 大谷翔平's goal-setting method
+  </footer>
+
+  <script>
+    // ============================================
+    // 1. CONSTANTS & CONFIGURATION
+    // ============================================
+    const STORAGE_KEY = 'mandala_chart_current';
+    const CHART_LIST_KEY = 'mandala_chart_list';
+
+    // Block4 cell index -> outer block index
+    const SUBGOAL_MIRROR_MAP = {
+      0: 0, 1: 1, 2: 2,
+      3: 3,       5: 5,
+      6: 6, 7: 7, 8: 8
+    };
+
+    // Reverse: outer block index -> Block4 cell index
+    const REVERSE_MIRROR_MAP = {};
+    for (const [cellIdx, blockIdx] of Object.entries(SUBGOAL_MIRROR_MAP)) {
+      REVERSE_MIRROR_MAP[blockIdx] = parseInt(cellIdx);
+    }
+
+    const BLOCK_LABELS = [
+      '左上', '上', '右上',
+      '左', '中心', '右',
+      '左下', '下', '右下'
+    ];
+
+    const COLOR_PRESETS = {
+      ohtani: {
+        0: '#FFCDD2', 1: '#F8BBD0', 2: '#E1BEE7',
+        3: '#C5CAE9', 4: '#FFF9C4', 5: '#B2DFDB',
+        6: '#C8E6C9', 7: '#FFE0B2', 8: '#B3E5FC'
+      },
+      pastel: {
+        0: '#FFE8E8', 1: '#FFE0F0', 2: '#F0E0FF',
+        3: '#E0E0FF', 4: '#FFFDE0', 5: '#E0FFF0',
+        6: '#E0FFE0', 7: '#FFF5E0', 8: '#E0F5FF'
+      },
+      vivid: {
+        0: '#FF8A80', 1: '#FF80AB', 2: '#EA80FC',
+        3: '#8C9EFF', 4: '#FFFF8D', 5: '#64FFDA',
+        6: '#69F0AE', 7: '#FFD180', 8: '#80D8FF'
+      },
+      ocean: {
+        0: '#B2EBF2', 1: '#B2DFDB', 2: '#C8E6C9',
+        3: '#80DEEA', 4: '#E0F7FA', 5: '#A5D6A7',
+        6: '#4DD0E1', 7: '#80CBC4', 8: '#81C784'
+      },
+      mono: {
+        0: '#E0E0E0', 1: '#EEEEEE', 2: '#E0E0E0',
+        3: '#EEEEEE', 4: '#F5F5F5', 5: '#EEEEEE',
+        6: '#E0E0E0', 7: '#EEEEEE', 8: '#E0E0E0'
+      }
+    };
+
+    // Accent colors derived from block bg (slightly darker)
+    function deriveAccent(hex) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      const darken = (v) => Math.max(0, Math.round(v * 0.82));
+      return `#${darken(r).toString(16).padStart(2, '0')}${darken(g).toString(16).padStart(2, '0')}${darken(b).toString(16).padStart(2, '0')}`;
+    }
+
+    // ============================================
+    // 2. APPLICATION STATE
+    // ============================================
+    let appState = {
+      cells: {},
+      colors: { ...COLOR_PRESETS.ohtani },
+      fontSize: 12,
+      metadata: {
+        id: null,
+        title: '',
+        createdAt: null,
+        updatedAt: null
+      }
+    };
+
+    // ============================================
+    // 3. DOM GENERATION
+    // ============================================
+    function generateChart() {
+      const chart = document.getElementById('mandala-chart');
+      chart.innerHTML = '';
+
+      for (let blockIdx = 0; blockIdx < 9; blockIdx++) {
+        const block = document.createElement('div');
+        block.className = `block block-${blockIdx}`;
+        if (blockIdx === 4) block.classList.add('block-center');
+        block.dataset.block = blockIdx;
+
+        for (let cellIdx = 0; cellIdx < 9; cellIdx++) {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'cell-wrapper';
+
+          const textarea = document.createElement('textarea');
+          textarea.className = 'cell';
+          textarea.dataset.block = blockIdx;
+          textarea.dataset.cell = cellIdx;
+          textarea.spellcheck = false;
+          textarea.maxLength = 50;
+          textarea.rows = 1;
+
+          if (blockIdx === 4 && cellIdx === 4) {
+            textarea.classList.add('cell-main-goal');
+            textarea.placeholder = '目標';
+          } else if (blockIdx === 4 && cellIdx !== 4) {
+            textarea.classList.add('cell-subgoal');
+          } else if (cellIdx === 4) {
+            textarea.classList.add('cell-subgoal');
+          }
+
+          wrapper.appendChild(textarea);
+          block.appendChild(wrapper);
+        }
+
+        chart.appendChild(block);
+      }
+    }
+
+    // ============================================
+    // 4. CELL SYNC (MIRRORING)
+    // ============================================
+    function syncMirroredCells(sourceBlock, sourceCell, value) {
+      if (sourceBlock === 4 && sourceCell !== 4) {
+        // Center block sub-goal -> outer block center
+        const targetBlock = SUBGOAL_MIRROR_MAP[sourceCell];
+        if (targetBlock !== undefined) {
+          const target = document.querySelector(
+            `textarea[data-block="${targetBlock}"][data-cell="4"]`
+          );
+          if (target && target.value !== value) {
+            target.value = value;
+          }
+          appState.cells[`${targetBlock}-4`] = value;
+        }
+      } else if (sourceBlock !== 4 && sourceCell === 4) {
+        // Outer block center -> center block sub-goal
+        const block4Cell = REVERSE_MIRROR_MAP[sourceBlock];
+        if (block4Cell !== undefined) {
+          const target = document.querySelector(
+            `textarea[data-block="4"][data-cell="${block4Cell}"]`
+          );
+          if (target && target.value !== value) {
+            target.value = value;
+          }
+          appState.cells[`4-${block4Cell}`] = value;
+        }
+      }
+    }
+
+    // ============================================
+    // 5. EVENT HANDLING
+    // ============================================
+    function setupEventListeners() {
+      const chart = document.getElementById('mandala-chart');
+
+      chart.addEventListener('input', (e) => {
+        if (e.target.matches('textarea.cell')) {
+          const block = parseInt(e.target.dataset.block);
+          const cell = parseInt(e.target.dataset.cell);
+          const value = e.target.value;
+
+          appState.cells[`${block}-${cell}`] = value;
+          syncMirroredCells(block, cell, value);
+          centerCellText(e.target);
+          // Also center mirrored cell
+          if (block === 4 && cell !== 4) {
+            const mirrorBlock = SUBGOAL_MIRROR_MAP[cell];
+            if (mirrorBlock !== undefined) {
+              const mirror = document.querySelector(`textarea[data-block="${mirrorBlock}"][data-cell="4"]`);
+              if (mirror) centerCellText(mirror);
+            }
+          } else if (block !== 4 && cell === 4) {
+            const block4Cell = REVERSE_MIRROR_MAP[block];
+            if (block4Cell !== undefined) {
+              const mirror = document.querySelector(`textarea[data-block="4"][data-cell="${block4Cell}"]`);
+              if (mirror) centerCellText(mirror);
+            }
+          }
+          debouncedAutoSave();
+        }
+      });
+
+      // Font size slider
+      document.getElementById('font-size-slider').addEventListener('input', (e) => {
+        applyFontSize(parseInt(e.target.value));
+        debouncedAutoSave();
+      });
+
+      // Keyboard navigation
+      chart.addEventListener('keydown', (e) => {
+        if (!e.target.matches('textarea.cell')) return;
+
+        const block = parseInt(e.target.dataset.block);
+        const cell = parseInt(e.target.dataset.cell);
+
+        // Tab: move to next cell within the 9x9 grid
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const direction = e.shiftKey ? -1 : 1;
+          navigateCell(block, cell, direction);
+        }
+
+        // Arrow keys with Ctrl: move between cells
+        if (e.ctrlKey && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+          e.preventDefault();
+          navigateArrow(block, cell, e.key);
+        }
+      });
+    }
+
+    function navigateCell(block, cell, direction) {
+      let newCell = cell + direction;
+      let newBlock = block;
+
+      if (newCell > 8) {
+        newCell = 0;
+        newBlock = block + 1;
+        if (newBlock > 8) newBlock = 0;
+      } else if (newCell < 0) {
+        newCell = 8;
+        newBlock = block - 1;
+        if (newBlock < 0) newBlock = 8;
+      }
+
+      const target = document.querySelector(
+        `textarea[data-block="${newBlock}"][data-cell="${newCell}"]`
+      );
+      if (target) target.focus();
+    }
+
+    function navigateArrow(block, cell, key) {
+      // Convert block/cell to global row/col in 9x9 grid
+      const blockRow = Math.floor(block / 3);
+      const blockCol = block % 3;
+      const cellRow = Math.floor(cell / 3);
+      const cellCol = cell % 3;
+
+      let globalRow = blockRow * 3 + cellRow;
+      let globalCol = blockCol * 3 + cellCol;
+
+      switch (key) {
+        case 'ArrowUp':    globalRow = Math.max(0, globalRow - 1); break;
+        case 'ArrowDown':  globalRow = Math.min(8, globalRow + 1); break;
+        case 'ArrowLeft':  globalCol = Math.max(0, globalCol - 1); break;
+        case 'ArrowRight': globalCol = Math.min(8, globalCol + 1); break;
+      }
+
+      const newBlockRow = Math.floor(globalRow / 3);
+      const newBlockCol = Math.floor(globalCol / 3);
+      const newCellRow = globalRow % 3;
+      const newCellCol = globalCol % 3;
+      const newBlock = newBlockRow * 3 + newBlockCol;
+      const newCell = newCellRow * 3 + newCellCol;
+
+      const target = document.querySelector(
+        `textarea[data-block="${newBlock}"][data-cell="${newCell}"]`
+      );
+      if (target) target.focus();
+    }
+
+    // ============================================
+    // 6. SAVE / LOAD
+    // ============================================
+    function autoSave() {
+      appState.metadata.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+    }
+
+    const debouncedAutoSave = debounce(autoSave, 500);
+
+    function saveChartAs() {
+      const titleInput = document.getElementById('chart-title');
+      const title = titleInput.value.trim() || 'マイチャート';
+
+      appState.metadata.title = title;
+      appState.metadata.updatedAt = new Date().toISOString();
+
+      if (!appState.metadata.id) {
+        appState.metadata.id = 'chart_' + Date.now();
+        appState.metadata.createdAt = new Date().toISOString();
+      }
+
+      // Save to chart list
+      const list = getChartList();
+      const existing = list.findIndex(c => c.id === appState.metadata.id);
+
+      const entry = {
+        id: appState.metadata.id,
+        title: title,
+        updatedAt: appState.metadata.updatedAt
+      };
+
+      if (existing >= 0) {
+        list[existing] = entry;
+      } else {
+        list.push(entry);
+      }
+
+      localStorage.setItem(CHART_LIST_KEY, JSON.stringify(list));
+      localStorage.setItem(appState.metadata.id, JSON.stringify(appState));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+
+      showToast('保存しました');
+    }
+
+    function loadFromLocalStorage() {
+      const json = localStorage.getItem(STORAGE_KEY);
+      if (json) {
+        try {
+          const data = JSON.parse(json);
+          Object.assign(appState, data);
+          populateChartFromState();
+          applyColorsFromState();
+          applyFontSize(appState.fontSize || 12);
+          if (appState.metadata.title) {
+            document.getElementById('chart-title').value = appState.metadata.title;
+          }
+        } catch (e) {
+          console.error('Failed to load:', e);
+        }
+      }
+    }
+
+    function loadChartById(id) {
+      const json = localStorage.getItem(id);
+      if (json) {
+        try {
+          const data = JSON.parse(json);
+          appState = data;
+          populateChartFromState();
+          applyColorsFromState();
+          applyFontSize(appState.fontSize || 12);
+          document.getElementById('chart-title').value = appState.metadata.title || '';
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+          closeModal();
+          showToast('読み込みました');
+        } catch (e) {
+          console.error('Failed to load chart:', e);
+        }
+      }
+    }
+
+    function deleteChartById(id) {
+      if (!confirm('このチャートを削除しますか？')) return;
+
+      const list = getChartList().filter(c => c.id !== id);
+      localStorage.setItem(CHART_LIST_KEY, JSON.stringify(list));
+      localStorage.removeItem(id);
+
+      if (appState.metadata.id === id) {
+        appState.metadata.id = null;
+      }
+
+      showLoadDialog();
+      showToast('削除しました');
+    }
+
+    function getChartList() {
+      try {
+        return JSON.parse(localStorage.getItem(CHART_LIST_KEY) || '[]');
+      } catch {
+        return [];
+      }
+    }
+
+    function populateChartFromState() {
+      for (const [key, value] of Object.entries(appState.cells)) {
+        const [block, cell] = key.split('-');
+        const textarea = document.querySelector(
+          `textarea[data-block="${block}"][data-cell="${cell}"]`
+        );
+        if (textarea) textarea.value = value || '';
+      }
+    }
+
+    function showLoadDialog() {
+      const list = getChartList();
+      const modal = document.getElementById('modal-content');
+
+      let html = '<h2>保存済みチャート</h2>';
+
+      if (list.length === 0) {
+        html += '<p class="empty-message">保存されたチャートはありません</p>';
+      } else {
+        html += '<ul class="chart-list">';
+        for (const chart of list.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))) {
+          const date = new Date(chart.updatedAt).toLocaleString('ja-JP');
+          html += `
+            <li class="chart-list-item">
+              <div class="chart-info" onclick="loadChartById('${chart.id}')">
+                <div class="chart-title">${escapeHtml(chart.title)}</div>
+                <div class="chart-date">${date}</div>
+              </div>
+              <div class="chart-actions">
+                <button class="btn-icon delete" onclick="event.stopPropagation(); deleteChartById('${chart.id}')" title="削除">&#128465;</button>
+              </div>
+            </li>
+          `;
+        }
+        html += '</ul>';
+      }
+
+      html += `
+        <div class="save-dialog">
+          <button class="btn btn-secondary" style="width:100%" onclick="startNewChart()">新規チャートを作成</button>
+        </div>
+      `;
+
+      modal.innerHTML = html;
+      document.getElementById('modal-overlay').classList.add('visible');
+    }
+
+    function startNewChart() {
+      if (!confirm('現在の内容を破棄して新規チャートを作成しますか？')) return;
+
+      appState = {
+        cells: {},
+        colors: { ...COLOR_PRESETS.ohtani },
+        fontSize: 12,
+        metadata: { id: null, title: '', createdAt: null, updatedAt: null }
+      };
+
+      document.querySelectorAll('textarea.cell').forEach(ta => ta.value = '');
+      document.getElementById('chart-title').value = '';
+      applyColorsFromState();
+      applyFontSize(12);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      closeModal();
+      showToast('新規チャートを作成しました');
+    }
+
+    function clearChart() {
+      if (!confirm('すべてのセルをクリアしますか？')) return;
+
+      appState.cells = {};
+      document.querySelectorAll('textarea.cell').forEach(ta => ta.value = '');
+      autoSave();
+      requestAnimationFrame(() => centerAllCells());
+      showToast('クリアしました');
+    }
+
+    function closeModal(e) {
+      if (e && e.target !== e.currentTarget) return;
+      document.getElementById('modal-overlay').classList.remove('visible');
+    }
+
+    // ============================================
+    // 7. EXPORT (PNG + PDF)
+    // ============================================
+    async function exportAsImage() {
+      showToast('PNG を生成中...');
+      const chart = document.getElementById('mandala-chart');
+      const title = appState.metadata.title || 'マンダラチャート';
+
+      prepareForExport(chart);
+
+      let exportWrapper = null;
+      let chartParent = null;
+
+      try {
+        await document.fonts.ready;
+
+        const wrapperInfo = createExportWrapper(chart, title);
+        exportWrapper = wrapperInfo.exportWrapper;
+        chartParent = wrapperInfo.chartParent;
+
+        const canvas = await html2canvas(exportWrapper, {
+          scale: 2,
+          backgroundColor: '#444444',
+          useCORS: true,
+          logging: false
+        });
+
+        removeExportWrapper(chart, exportWrapper, chartParent);
+        exportWrapper = null;
+
+        const link = document.createElement('a');
+        const safeFilename = sanitizeFilename(title);
+        link.download = `${safeFilename}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showToast('PNG をダウンロードしました');
+      } catch (e) {
+        console.error('Export failed:', e);
+        showToast('エクスポートに失敗しました');
+      } finally {
+        if (exportWrapper) {
+          removeExportWrapper(chart, exportWrapper, chartParent);
+        }
+        cleanupAfterExport(chart);
+      }
+    }
+
+    async function exportAsPDF() {
+      showToast('PDF を生成中...');
+      const chart = document.getElementById('mandala-chart');
+      const title = appState.metadata.title || 'マンダラチャート';
+
+      prepareForExport(chart);
+
+      let exportWrapper = null;
+      let chartParent = null;
+
+      try {
+        await document.fonts.ready;
+
+        const wrapperInfo = createExportWrapper(chart, title);
+        exportWrapper = wrapperInfo.exportWrapper;
+        chartParent = wrapperInfo.chartParent;
+
+        const canvas = await html2canvas(exportWrapper, {
+          scale: 2,
+          backgroundColor: '#444444',
+          useCORS: true,
+          logging: false
+        });
+
+        removeExportWrapper(chart, exportWrapper, chartParent);
+        exportWrapper = null;
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'mm',
+          format: 'a4'
+        });
+
+        const imgData = canvas.toDataURL('image/png');
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const margin = 15;
+        const availableWidth = pageWidth - 2 * margin;
+        const availableHeight = pageHeight - 2 * margin;
+
+        const imgAspect = canvas.width / canvas.height;
+        let renderWidth, renderHeight;
+
+        if (availableWidth / availableHeight > imgAspect) {
+          renderHeight = availableHeight;
+          renderWidth = renderHeight * imgAspect;
+        } else {
+          renderWidth = availableWidth;
+          renderHeight = renderWidth / imgAspect;
+        }
+
+        const x = (pageWidth - renderWidth) / 2;
+        const y = (pageHeight - renderHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', x, y, renderWidth, renderHeight);
+
+        const safeFilename = sanitizeFilename(title);
+        pdf.save(`${safeFilename}.pdf`);
+        showToast('PDF をダウンロードしました');
+      } catch (e) {
+        console.error('PDF export failed:', e);
+        showToast('PDF エクスポートに失敗しました');
+      } finally {
+        if (exportWrapper) {
+          removeExportWrapper(chart, exportWrapper, chartParent);
+        }
+        cleanupAfterExport(chart);
+      }
+    }
+
+    function prepareForExport(chartEl) {
+      chartEl.querySelectorAll('textarea.cell').forEach(ta => {
+        const wrapper = ta.parentElement;
+        const div = document.createElement('div');
+        div.className = 'cell-export-overlay';
+        div.textContent = ta.value;
+
+        const computed = window.getComputedStyle(ta);
+        div.style.fontSize = computed.fontSize;
+        div.style.fontWeight = computed.fontWeight;
+        div.style.fontFamily = computed.fontFamily;
+        div.style.color = computed.color;
+        div.style.backgroundColor = computed.backgroundColor;
+        div.style.lineHeight = computed.lineHeight;
+
+        wrapper.appendChild(div);
+        ta.style.visibility = 'hidden';
+      });
+    }
+
+    function cleanupAfterExport(chartEl) {
+      chartEl.querySelectorAll('.cell-export-overlay').forEach(div => div.remove());
+      chartEl.querySelectorAll('textarea.cell').forEach(ta => {
+        ta.style.visibility = 'visible';
+      });
+    }
+
+    // ============================================
+    // 8. FONT SIZE CUSTOMIZATION
+    // ============================================
+    function applyFontSize(size) {
+      appState.fontSize = size;
+      const chart = document.getElementById('mandala-chart');
+      chart.style.setProperty('--cell-font-size', size + 'px');
+      chart.style.setProperty('--main-goal-font-size', Math.round(size * 1.2) + 'px');
+      document.getElementById('font-size-slider').value = size;
+      document.getElementById('font-size-value').textContent = size + 'px';
+      // Re-center all cells after font size change
+      requestAnimationFrame(() => centerAllCells());
+    }
+
+    // ============================================
+    // 9. COLOR CUSTOMIZATION
+    // ============================================
+    function generateColorSwatches() {
+      const container = document.getElementById('color-swatches');
+      container.innerHTML = '';
+
+      for (let i = 0; i < 9; i++) {
+        const swatch = document.createElement('div');
+        swatch.className = 'swatch';
+
+        const label = document.createElement('label');
+        label.textContent = BLOCK_LABELS[i];
+
+        const input = document.createElement('input');
+        input.type = 'color';
+        input.value = appState.colors[i] || COLOR_PRESETS.ohtani[i];
+        input.dataset.block = i;
+        input.addEventListener('input', (e) => {
+          applyBlockColor(parseInt(e.target.dataset.block), e.target.value);
+        });
+
+        swatch.appendChild(input);
+        swatch.appendChild(label);
+        container.appendChild(swatch);
+      }
+    }
+
+    function applyBlockColor(blockIndex, color) {
+      appState.colors[blockIndex] = color;
+      const block = document.querySelector(`.block-${blockIndex}`);
+      if (block) {
+        block.style.setProperty('--block-bg', color);
+        block.style.setProperty('--block-accent', deriveAccent(color));
+        if (blockIndex === 4) {
+          block.style.setProperty('--center-subgoal-bg', deriveAccent(color));
+        }
+      }
+      debouncedAutoSave();
+    }
+
+    function applyColorsFromState() {
+      for (let i = 0; i < 9; i++) {
+        const color = appState.colors[i];
+        if (color) {
+          const block = document.querySelector(`.block-${i}`);
+          if (block) {
+            block.style.setProperty('--block-bg', color);
+            block.style.setProperty('--block-accent', deriveAccent(color));
+            if (i === 4) {
+              block.style.setProperty('--center-subgoal-bg', deriveAccent(color));
+            }
+          }
+        }
+      }
+    }
+
+    function applyPreset(presetName) {
+      const preset = COLOR_PRESETS[presetName];
+      if (!preset) return;
+
+      appState.colors = { ...preset };
+
+      for (let i = 0; i < 9; i++) {
+        applyBlockColor(i, preset[i]);
+      }
+
+      generateColorSwatches();
+      showToast(`テーマ「${presetName}」を適用しました`);
+    }
+
+    function toggleColorPanel() {
+      const panel = document.getElementById('color-panel');
+      panel.classList.toggle('visible');
+      if (panel.classList.contains('visible')) {
+        generateColorSwatches();
+      }
+    }
+
+    // ============================================
+    // 10. CELL VERTICAL CENTERING
+    // ============================================
+    function centerCellText(textarea) {
+      // Reset padding to measure properly
+      textarea.style.paddingTop = '0px';
+      textarea.style.paddingBottom = '0px';
+
+      const cellHeight = textarea.offsetHeight;
+      const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight);
+      const fontSize = parseFloat(getComputedStyle(textarea).fontSize);
+      const effectiveLineHeight = isNaN(lineHeight) ? fontSize * 1.3 : lineHeight;
+
+      // Measure text height using scrollHeight with minimal padding
+      const textHeight = textarea.scrollHeight;
+
+      if (cellHeight > textHeight) {
+        const pad = Math.floor((cellHeight - textHeight) / 2);
+        textarea.style.paddingTop = pad + 'px';
+        textarea.style.paddingBottom = '0px';
+      } else {
+        textarea.style.paddingTop = '2px';
+        textarea.style.paddingBottom = '2px';
+      }
+    }
+
+    function centerAllCells() {
+      document.querySelectorAll('textarea.cell').forEach(ta => centerCellText(ta));
+    }
+
+    // ============================================
+    // 11. UTILITY
+    // ============================================
+    function debounce(fn, delay) {
+      let timer;
+      return function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function sanitizeFilename(name) {
+      let sanitized = name.replace(/[<>:"/\\|?*\x00-\x1f]/g, '');
+      sanitized = sanitized.replace(/^[\s.]+|[\s.]+$/g, '');
+      return sanitized || 'mandala-chart';
+    }
+
+    function createExportWrapper(chart, title) {
+      const chartParent = chart.parentNode;
+
+      // チャートの実際のサイズを固定（ラッパー移動後もセルサイズ変化なし）
+      const chartWidth = chart.offsetWidth;
+      chart.style.width = chartWidth + 'px';
+      chart.style.minWidth = chartWidth + 'px';
+
+      const exportWrapper = document.createElement('div');
+      exportWrapper.style.cssText = 'display:inline-block; background:#444444; padding:20px 20px 5px; border-radius:10px;';
+
+      const titleDiv = document.createElement('div');
+      titleDiv.textContent = title;
+      titleDiv.style.cssText = "text-align:center; font-family:'Noto Sans JP',sans-serif; font-size:24px; font-weight:700; color:#ffffff; padding-bottom:12px;";
+
+      exportWrapper.appendChild(titleDiv);
+      chartParent.insertBefore(exportWrapper, chart);
+      exportWrapper.appendChild(chart);
+
+      return { exportWrapper, chartParent };
+    }
+
+    function removeExportWrapper(chart, exportWrapper, chartParent) {
+      if (exportWrapper && exportWrapper.parentNode) {
+        chartParent.insertBefore(chart, exportWrapper);
+        exportWrapper.remove();
+      }
+      // 固定サイズをリセットして元のレスポンシブ表示に戻す
+      chart.style.width = '';
+      chart.style.minWidth = '';
+    }
+
+    // ============================================
+    // 10. INITIALIZATION
+    // ============================================
+    document.addEventListener('DOMContentLoaded', () => {
+      generateChart();
+      loadFromLocalStorage();
+      setupEventListeners();
+      // Initial centering after layout
+      requestAnimationFrame(() => centerAllCells());
+    });
+
+    // Re-center on window resize
+    window.addEventListener('resize', debounce(() => centerAllCells(), 200));
+  </script>
+</body>
+</html>
