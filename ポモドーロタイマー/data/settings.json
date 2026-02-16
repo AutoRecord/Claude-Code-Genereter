@@ -1,0 +1,9 @@
+{
+  "work_minutes": 1,
+  "short_break_minutes": 1,
+  "long_break_minutes": 15,
+  "cycles_before_long_break": 4,
+  "dark_mode": true,
+  "opacity": 0.75,
+  "ui_scale": 100
+}
