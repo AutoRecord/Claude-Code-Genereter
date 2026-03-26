@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>議事録テンプレート</title>
+<style>
+  body {
+    font-family: 'Yu Gothic UI', 'Meiryo UI', 'Yu Gothic', 'Meiryo', sans-serif;
+    font-size: 10.5pt;
+    color: #2d2d2d;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 24px;
+    line-height: 1.6;
+    background: #fff;
+  }
+
+  /* ========== Header ========== */
+  .header {
+    background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+    color: #fff;
+    padding: 20px 24px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    font-size: 20pt;
+    margin: 0 0 4px 0;
+    font-weight: 700;
+    letter-spacing: 2px;
+  }
+  .header .subtitle {
+    font-size: 10pt;
+    opacity: 0.85;
+  }
+
+  /* ========== Section Headers ========== */
+  h2 {
+    font-size: 13pt;
+    color: #1a237e;
+    border-left: 4px solid #3949ab;
+    padding: 6px 0 6px 12px;
+    margin: 28px 0 12px 0;
+    background: #f5f6ff;
+    border-radius: 0 4px 4px 0;
+  }
+  h3 {
+    font-size: 11pt;
+    color: #455a64;
+    margin: 16px 0 8px 0;
+    padding-left: 4px;
+  }
+
+  /* ========== Tables ========== */
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 8px 0 16px 0;
+    font-size: 10pt;
+  }
+  th {
+    background-color: #3949ab;
+    color: #fff;
+    padding: 7px 10px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 9.5pt;
+    white-space: nowrap;
+  }
+  td {
+    border: 1px solid #dee2e6;
+    padding: 6px 10px;
+    vertical-align: top;
+  }
+  tr:nth-child(even) { background-color: #f8f9fe; }
+  tr:hover { background-color: #eef0ff; }
+
+  /* Info Table */
+  .info-table td:first-child {
+    background-color: #e8eaf6;
+    font-weight: 600;
+    width: 130px;
+    color: #1a237e;
+    white-space: nowrap;
+  }
+
+  /* Color-coded section headers */
+  .section-goal h2 { color: #1565c0; border-left-color: #1565c0; background: #e3f2fd; }
+  .section-prev h2 { color: #6a1b9a; border-left-color: #6a1b9a; background: #f3e5f5; }
+  .section-decision h2 { color: #1b5e20; border-left-color: #2e7d32; background: #e8f5e9; }
+  .section-pending h2 { color: #e65100; border-left-color: #ef6c00; background: #fff3e0; }
+  .section-todo h2 { color: #b71c1c; border-left-color: #c62828; background: #ffebee; }
+  .section-approval h2 { color: #4a148c; border-left-color: #6a1b9a; background: #f3e5f5; }
+  .section-risk h2 { color: #bf360c; border-left-color: #d84315; background: #fbe9e7; }
+
+  /* Color-coded table headers */
+  .tbl-goal th { background-color: #1565c0; }
+  .tbl-prev th { background-color: #6a1b9a; }
+  .tbl-decision th { background-color: #2e7d32; }
+  .tbl-pending th { background-color: #ef6c00; }
+  .tbl-todo th { background-color: #c62828; }
+  .tbl-approval th { background-color: #6a1b9a; }
+  .tbl-risk th { background-color: #d84315; }
+
+  /* ========== Misc ========== */
+  hr {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 24px 0;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    color: #fff;
+  }
+  .badge-report { background: #1565c0; }
+  .badge-decision { background: #2e7d32; }
+  .badge-discuss { background: #ef6c00; }
+  .badge-approve { background: #6a1b9a; }
+
+  .important-note {
+    background: #fff8e1;
+    border: 1px solid #ffca28;
+    border-left: 4px solid #ffa000;
+    padding: 10px 14px;
+    margin: 16px 0;
+    border-radius: 4px;
+    font-size: 9.5pt;
+    color: #5d4037;
+  }
+
+  .footer {
+    font-size: 9pt;
+    color: #78909c;
+    margin-top: 32px;
+    border-top: 2px solid #e0e0e0;
+    padding-top: 12px;
+  }
+  .footer .agreement {
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-left: 4px solid #c62828;
+    padding: 10px 14px;
+    border-radius: 4px;
+    color: #b71c1c;
+    font-weight: 600;
+    font-size: 9pt;
+    margin-top: 12px;
+  }
+
+  ul { margin: 4px 0; padding-left: 20px; }
+  li { margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<div class="header">
+  <h1>📋 議 事 録</h1>
+  <div class="subtitle">Meeting Minutes</div>
+</div>
+
+<!-- ============ 基本情報 ============ -->
+<h2>基本情報</h2>
+<table class="info-table">
+  <tr><td>会議名称</td><td></td></tr>
+  <tr><td>開催日時</td><td>20XX年XX月XX日（X） XX:XX ～ XX:XX</td></tr>
+  <tr><td>開催場所</td><td>Teams会議（リンク：）</td></tr>
+  <tr><td>会議形式</td><td>オンライン / ハイブリッド</td></tr>
+  <tr><td>Teams録画</td><td>あり / なし（リンク：）</td></tr>
+</table>
+
+<!-- ============ 会議の目的・ゴール ============ -->
+<div class="section-goal">
+<h2>🎯 会議の目的・ゴール</h2>
+</div>
+<table class="tbl-goal">
+  <tr><th style="width:100px;">項目</th><th>内容</th></tr>
+  <tr>
+    <td><strong>目的</strong></td>
+    <td>
+      <span class="badge badge-report">報告</span>
+      <span class="badge badge-decision">意思決定</span>
+      <span class="badge badge-discuss">ディスカッション</span>
+      <span class="badge badge-approve">承認</span>
+      <br><br>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>ゴール</strong></td>
+    <td>本会議で達成したいこと：</td>
+  </tr>
+</table>
+
+<!-- ============ 出席者 ============ -->
+<h2>出席者（敬称略）</h2>
+<table>
+  <tr><th style="width:160px;">所属</th><th>氏名</th><th style="width:80px;">役割</th></tr>
+  <tr><td>〇〇部（依頼元）</td><td></td><td></td></tr>
+  <tr><td>△△部（担当）</td><td></td><td></td></tr>
+  <tr><td>△△部（担当）</td><td></td><td>書記</td></tr>
+</table>
+<p><strong>欠席者：</strong></p>
+
+<!-- ============ 配布資料 ============ -->
+<h2>配布資料</h2>
+<ul>
+  <li></li>
+</ul>
+
+<hr>
+
+<!-- ============ アジェンダ ============ -->
+<h2>アジェンダ</h2>
+<table>
+  <tr><th style="width:40px;">No.</th><th>議題</th><th style="width:80px;">種別</th><th style="width:80px;">時間配分</th></tr>
+  <tr><td>0</td><td>前回アクションアイテムの確認</td><td><span class="badge badge-report">確認</span></td><td>5分</td></tr>
+  <tr><td>1</td><td>下半期 経過報告</td><td><span class="badge badge-report">報告</span></td><td>分</td></tr>
+  <tr><td>2</td><td>来年度 計画発表</td><td><span class="badge badge-decision">決定</span></td><td>分</td></tr>
+  <tr><td>3</td><td>質疑応答・ディスカッション</td><td><span class="badge badge-discuss">議論</span></td><td>分</td></tr>
+</table>
+
+<hr>
+
+<!-- ============ 前回TODO確認 ============ -->
+<div class="section-prev">
+<h2>0. 前回アクションアイテムの確認</h2>
+</div>
+<table class="tbl-prev">
+  <tr><th style="width:40px;">No.</th><th>前回のTODO</th><th style="width:80px;">担当者</th><th style="width:60px;">状態</th><th>報告内容</th></tr>
+  <tr><td>1</td><td></td><td></td><td>完了/未了</td><td></td></tr>
+  <tr><td>2</td><td></td><td></td><td>完了/未了</td><td></td></tr>
+</table>
+
+<h3>発言記録</h3>
+<table>
+  <tr><th style="width:100px;">発言者</th><th>内容</th></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+</table>
+
+<hr>
+
+<!-- ============ 議題1 ============ -->
+<h2>1. 下半期 経過報告</h2>
+<p><strong>報告者：</strong></p>
+
+<h3>進捗サマリ</h3>
+<table>
+  <tr><th>項目</th><th>計画</th><th>実績</th><th>達成率</th><th>備考</th></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+
+<h3>発言・議論</h3>
+<table>
+  <tr><th style="width:100px;">発言者</th><th>内容</th></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+</table>
+
+<h3>課題・リスク</h3>
+<table>
+  <tr><th style="width:100px;">発言者</th><th>課題内容</th><th>対応方針</th></tr>
+  <tr><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td></tr>
+</table>
+
+<hr>
+
+<!-- ============ 議題2 ============ -->
+<h2>2. 来年度 計画発表</h2>
+<p><strong>発表者：</strong></p>
+
+<h3>計画概要</h3>
+<table>
+  <tr><th>項目</th><th>内容</th><th>スケジュール</th><th>予算</th><th>備考</th></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td></tr>
+  <tr><td></td><td></td><td></td><td></td><td></td></tr>
+</table>
+
+<h3>発言・議論</h3>
+<table>
+  <tr><th style="width:100px;">発言者</th><th>内容</th></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+</table>
+
+<hr>
+
+<!-- ============ 質疑応答 ============ -->
+<h2>3. 質疑応答・ディスカッション</h2>
+<table>
+  <tr><th style="width:100px;">発言者</th><th>内容</th></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+  <tr><td></td><td></td></tr>
+</table>
+
+<hr>
+
+<!-- ============ まとめセクション ============ -->
+<div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin-top: 24px;">
+
+<!-- 決定事項 -->
+<div class="section-decision">
+<h2>✅ 決定事項</h2>
+</div>
+<table class="tbl-decision">
+  <tr><th>No.</th><th>決定内容</th><th style="width:100px;">決定者</th><th style="width:120px;">合意者</th><th>補足</th></tr>
+  <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+  <tr><td>2</td><td></td><td></td><td></td><td></td></tr>
+</table>
+
+<!-- 保留事項 -->
+<div class="section-pending">
+<h2>⏸️ 保留事項</h2>
+</div>
+<table class="tbl-pending">
+  <tr><th>No.</th><th>内容</th><th style="width:80px;">提起者</th><th>保留理由</th><th style="width:100px;">次回確認予定</th></tr>
+  <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+</table>
+
+<!-- アクションアイテム -->
+<div class="section-todo">
+<h2>📌 アクションアイテム（TODO）</h2>
+</div>
+<table class="tbl-todo">
+  <tr><th>No.</th><th>タスク内容</th><th style="width:80px;">担当者</th><th style="width:80px;">依頼者</th><th style="width:80px;">期限</th><th style="width:60px;">状態</th></tr>
+  <tr><td>1</td><td></td><td></td><td></td><td></td><td>未着手</td></tr>
+  <tr><td>2</td><td></td><td></td><td></td><td></td><td>未着手</td></tr>
+  <tr><td>3</td><td></td><td></td><td></td><td></td><td>未着手</td></tr>
+</table>
+
+<!-- 確認・承認事項 -->
+<div class="section-approval">
+<h2>🔏 確認・承認が必要な事項</h2>
+</div>
+<table class="tbl-approval">
+  <tr><th>No.</th><th>承認内容</th><th style="width:80px;">確認者</th><th style="width:80px;">期限</th><th style="width:60px;">状態</th></tr>
+  <tr><td>1</td><td></td><td></td><td></td><td>未承認</td></tr>
+</table>
+
+<!-- リスク・懸念事項 -->
+<div class="section-risk">
+<h2>⚠️ リスク・懸念事項</h2>
+</div>
+<table class="tbl-risk">
+  <tr><th>No.</th><th>リスク内容</th><th style="width:80px;">指摘者</th><th>対応方針</th><th style="width:80px;">対応期限</th></tr>
+  <tr><td>1</td><td></td><td></td><td></td><td></td></tr>
+</table>
+
+</div><!-- /まとめセクション -->
+
+<hr>
+
+<!-- ============ 次回会議 ============ -->
+<h2>次回会議</h2>
+<table class="info-table">
+  <tr><td>日時</td><td></td></tr>
+  <tr><td>場所</td><td></td></tr>
+  <tr><td>議題（予定）</td><td></td></tr>
+</table>
+
+<!-- ============ 備考 ============ -->
+<h2>備考</h2>
+<ul>
+  <li></li>
+</ul>
+
+<!-- ============ フッター ============ -->
+<div class="footer">
+  <table class="info-table" style="width:auto;">
+    <tr><td>作成者</td><td></td></tr>
+    <tr><td>作成日</td><td></td></tr>
+    <tr><td>共有先</td><td></td></tr>
+  </table>
+
+  <div class="agreement">
+    ⚠️ 本議事録の内容に誤りがある場合は【XX月XX日（X）】までにご連絡ください。<br>
+    期日を過ぎた場合、記載内容についてご出席者全員の合意を得たものとします。
+  </div>
+</div>
+
+</body>
+</html>
