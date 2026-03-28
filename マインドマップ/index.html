@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゆずソフト ルート分岐マインドマップ</title>
+    <meta name="description" content="ゆずソフト作品のルート分岐とストーリー要約をインタラクティブなマインドマップで閲覧できます">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0b0a14;
+            --card-bg: rgba(22, 18, 38, 0.9);
+            --text: #e8e0f0;
+            --text-sub: #9b8fb8;
+            --accent1: #f2a0b7;
+            --accent2: #a78bfa;
+            --accent3: #fbbf24;
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Particles */
+        #bg-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* Header */
+        .header {
+            position: relative; z-index: 2;
+            text-align: center; padding: 64px 20px 40px;
+            background: linear-gradient(180deg, rgba(30,20,50,0.8) 0%, transparent 100%);
+        }
+        .header .brand {
+            font-size: 13px; color: var(--accent2); letter-spacing: 0.4em;
+            text-transform: uppercase; margin-bottom: 12px;
+        }
+        .header h1 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(28px, 5vw, 44px); font-weight: 900;
+            background: linear-gradient(135deg, var(--accent1), var(--accent3), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; letter-spacing: 0.08em;
+        }
+        .header p {
+            color: var(--text-sub); font-size: 14px; margin-top: 12px;
+            letter-spacing: 0.1em; line-height: 1.8;
+        }
+
+        /* Container */
+        .container {
+            position: relative; z-index: 2;
+            max-width: 900px; margin: 0 auto; padding: 0 20px 80px;
+        }
+
+        /* Game Cards */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px; margin-top: 48px;
+        }
+        .game-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(155,114,207,0.15);
+            border-radius: 20px; padding: 32px;
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            cursor: pointer; text-decoration: none; color: inherit;
+            display: block; position: relative; overflow: hidden;
+        }
+        .game-card::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            width: 100%; height: 4px;
+            background: var(--card-accent);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .game-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+            border-color: var(--card-accent);
+        }
+        .game-card:hover::before { opacity: 1; }
+
+        .game-card .year {
+            font-size: 12px; color: var(--text-sub);
+            letter-spacing: 0.2em; margin-bottom: 8px;
+        }
+        .game-card h2 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 24px; font-weight: 900;
+            margin-bottom: 4px;
+        }
+        .game-card .en-name {
+            font-size: 12px; color: var(--text-sub);
+            letter-spacing: 0.15em; margin-bottom: 16px;
+        }
+        .game-card .desc {
+            font-size: 13px; line-height: 1.8; color: var(--text-sub);
+        }
+        .game-card .desc strong { color: var(--text); }
+        .game-card .meta {
+            display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;
+        }
+        .game-card .meta-tag {
+            padding: 3px 12px; border-radius: 12px; font-size: 11px;
+            background: rgba(155,114,207,0.1);
+            border: 1px solid rgba(155,114,207,0.2);
+            color: var(--text-sub);
+        }
+        .game-card .arrow {
+            position: absolute; right: 24px; bottom: 24px;
+            font-size: 20px; color: var(--text-sub);
+            transition: transform 0.3s, color 0.3s;
+        }
+        .game-card:hover .arrow {
+            transform: translateX(4px);
+            color: var(--card-accent);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center; padding: 32px; font-size: 11px;
+            color: rgba(155,143,184,0.4); position: relative; z-index: 2;
+        }
+
+        @media (max-width: 480px) {
+            .game-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+
+<header class="header">
+    <div class="brand">YUZUSOFT VISUAL NOVEL</div>
+    <h1>ルート分岐マインドマップ</h1>
+    <p>ゆずソフト作品のストーリー分岐と各ルート要約を<br>インタラクティブなマインドマップで閲覧</p>
+</header>
+
+<div class="container">
+    <div class="game-grid">
+        <a href="千恋万花.html" class="game-card" style="--card-accent: #f2a0b7;">
+            <div class="year">2016</div>
+            <h2 style="color: #f2a0b7;">千恋＊万花</h2>
+            <div class="en-name">SENREN＊BANKA</div>
+            <div class="desc">
+                山奥の温泉街<strong>「穂織」</strong>を舞台に、神刀<strong>「叢雨丸」</strong>をへし折った主人公が
+                巫女姫との婚約から始まる和風恋愛アドベンチャー。
+            </div>
+            <div class="meta">
+                <span class="meta-tag">6ルート</span>
+                <span class="meta-tag">和風</span>
+                <span class="meta-tag">呪いと怪異</span>
+            </div>
+            <span class="arrow">→</span>
+        </a>
+
+        <a href="サノバウィッチ.html" class="game-card" style="--card-accent: #a78bfa;">
+            <div class="year">2015</div>
+            <h2 style="color: #a78bfa;">サノバウィッチ</h2>
+            <div class="en-name">SABBAT OF THE WITCH</div>
+            <div class="desc">
+                <strong>他人の感情を感じ取る</strong>特異体質の主人公が、魔女の秘密を抱えるヒロインと出会い、
+                <strong>「願い」と「代償」</strong>をめぐる物語。
+            </div>
+            <div class="meta">
+                <span class="meta-tag">5ルート</span>
+                <span class="meta-tag">魔女</span>
+                <span class="meta-tag">タイムリープ</span>
+            </div>
+            <span class="arrow">→</span>
+        </a>
+    </div>
+</div>
+
+<footer class="footer">ゆずソフト ルート分岐マインドマップ — Fan-made reference</footer>
+
+<script>
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+const colors = ['#f2a0b7', '#a78bfa', '#fbbf24', '#6dd9a0', '#60a5fa'];
+const particles = Array.from({ length: 40 }, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    size: 1 + Math.random() * 2.5, speed: 0.1 + Math.random() * 0.3,
+    drift: (Math.random() - 0.5) * 0.2, opacity: 0.08 + Math.random() * 0.2,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    phase: Math.random() * Math.PI * 2
+}));
+
+function draw() {
+    ctx.clearRect(0, 0, W, H);
+    particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.opacity;
+        ctx.fillStyle = p.color;
+        ctx.shadowColor = p.color;
+        ctx.shadowBlur = 6;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+        p.y -= p.speed;
+        p.x += p.drift + Math.sin(p.phase += 0.008) * 0.15;
+        if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+    });
+    requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
