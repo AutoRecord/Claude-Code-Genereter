@@ -102,21 +102,26 @@
             backdrop-filter: blur(12px);
             margin-bottom: 40px;
         }
-        #mindmap-svg { width: 100%; min-height: 520px; }
+        #mindmap-svg { width: 100%; min-height: 200px; transition: min-height 0.4s ease; }
         #mindmap-svg text {
             font-family: 'Noto Sans JP', sans-serif;
             fill: var(--text-primary);
         }
-        #mindmap-svg .link {
-            fill: none; stroke-width: 2.5; opacity: 0.6;
-        }
-        #mindmap-svg .node-circle {
-            cursor: pointer; transition: r 0.2s;
-        }
-        #mindmap-svg .node-circle:hover { filter: brightness(1.3); }
-        #mindmap-svg .node-label { cursor: pointer; font-size: 13px; }
+        #mindmap-svg .link { fill: none; stroke-width: 2.5; opacity: 0.6; transition: opacity 0.3s; }
+        #mindmap-svg .node-g { cursor: pointer; transition: opacity 0.3s; }
+        #mindmap-svg .node-circle { transition: r 0.2s, filter 0.2s; }
+        #mindmap-svg .node-g:hover .node-circle { filter: brightness(1.3); }
+        #mindmap-svg .node-label { font-size: 13px; }
         #mindmap-svg .node-label.root { font-size: 16px; font-weight: 700; }
         #mindmap-svg .node-label.l1 { font-size: 14px; font-weight: 700; }
+        #mindmap-svg .toggle-badge {
+            font-size: 10px; font-weight: 700; font-family: 'Noto Sans JP', sans-serif;
+            cursor: pointer; user-select: none;
+        }
+        .mindmap-hint {
+            text-align: center; font-size: 12px; color: var(--text-secondary);
+            margin-top: -32px; margin-bottom: 40px; opacity: 0.7;
+        }
 
         /* ── Route Cards ── */
         .route-grid {
@@ -246,8 +251,9 @@
     <!-- Mindmap -->
     <h2 class="section-title">ルート分岐マップ</h2>
     <div id="mindmap-area">
-        <svg id="mindmap-svg" viewBox="0 0 1100 520"></svg>
+        <svg id="mindmap-svg"></svg>
     </div>
+    <div class="mindmap-hint">💡 ノードをクリックして分岐を開閉できます</div>
 
     <!-- Recommended Order -->
     <h2 class="section-title">推奨攻略順</h2>
@@ -390,40 +396,73 @@ const tree = {
     ]
 };
 
-// ── Render Mindmap SVG ──
+// ── Collapsible State ──
+const collapsedState = {};
+function nodeKey(level, index) { return level + '-' + index; }
+
 function renderMindmap() {
     const svg = document.getElementById('mindmap-svg');
     const ns = 'http://www.w3.org/2000/svg';
     svg.innerHTML = '';
 
-    // Layout positions
-    const root = { x: 70, y: 260, name: tree.name, color: tree.color };
-    const common = { x: 280, y: 260, name: '共通ルート', color: '#9b72cf' };
-
+    const nodes = [];
+    const links = [];
     const heroines = tree.children[0].children;
-    const hYStart = 40;
-    const hYStep = 78;
 
-    const nodes = [root, common];
-    const links = [{ from: root, to: common, color: '#9b72cf' }];
+    let currentY = 40;
+    const rowH = 32;
+    const rootKey = nodeKey(0, 0);
+    const commonKey = nodeKey(1, 0);
+    const rootCollapsed = collapsedState[rootKey];
+    const commonCollapsed = collapsedState[commonKey];
 
-    heroines.forEach((h, i) => {
-        const hy = hYStart + i * hYStep;
-        const hNode = { x: 520, y: hy, name: h.name, color: h.color, route: h.route, level: 1 };
-        nodes.push(hNode);
-        links.push({ from: common, to: hNode, color: h.color });
+    const groups = [];
+    if (!rootCollapsed && !commonCollapsed) {
+        heroines.forEach((h, i) => {
+            const hKey = nodeKey(2, i);
+            const hCollapsed = collapsedState[hKey];
+            const childCount = (!hCollapsed && h.children) ? h.children.length : 0;
+            const groupHeight = Math.max(1, childCount) * rowH;
+            groups.push({ h, i, hKey, hCollapsed, childCount, y: 0, groupHeight });
+        });
+        groups.forEach(g => {
+            g.y = currentY + g.groupHeight / 2;
+            currentY += g.groupHeight + 12;
+        });
+    }
 
-        if (h.children) {
-            h.children.forEach((c, j) => {
-                const cy = hy - ((h.children.length - 1) * 24) / 2 + j * 24;
-                const cNode = { x: 800, y: cy, name: c.name, color: c.color, level: 2 };
-                nodes.push(cNode);
-                links.push({ from: hNode, to: cNode, color: c.color });
+    const totalH = Math.max(currentY + 20, 100);
+    const midY = totalH / 2;
+
+    const rootNode = { x: 70, y: midY, name: tree.name, color: tree.color, key: rootKey, hasChildren: true };
+    nodes.push(rootNode);
+
+    if (!rootCollapsed) {
+        const commonNode = { x: 260, y: midY, name: '共通ルート', color: '#9b72cf', level: 1, key: commonKey, hasChildren: true };
+        nodes.push(commonNode);
+        links.push({ from: rootNode, to: commonNode, color: '#9b72cf' });
+
+        if (!commonCollapsed) {
+            groups.forEach(g => {
+                const hNode = { x: 490, y: g.y, name: g.h.name, color: g.h.color, route: g.h.route, level: 1, key: g.hKey, hasChildren: !!(g.h.children && g.h.children.length) };
+                nodes.push(hNode);
+                links.push({ from: commonNode, to: hNode, color: g.h.color });
+
+                if (!g.hCollapsed && g.h.children) {
+                    g.h.children.forEach((c, j) => {
+                        const cy = g.y - ((g.childCount - 1) * rowH) / 2 + j * rowH;
+                        const cNode = { x: 760, y: cy, name: c.name, color: c.color, level: 2 };
+                        nodes.push(cNode);
+                        links.push({ from: hNode, to: cNode, color: c.color });
+                    });
+                }
             });
         }
-    });
+    }
 
-    // Draw links
+    svg.setAttribute('viewBox', `0 0 1050 ${totalH}`);
+    svg.style.minHeight = totalH + 'px';
+
     links.forEach(l => {
         const path = document.createElementNS(ns, 'path');
         const mx = (l.from.x + l.to.x) / 2;
@@ -433,31 +472,58 @@ function renderMindmap() {
         svg.appendChild(path);
     });
 
-    // Draw nodes
     nodes.forEach(n => {
         const g = document.createElementNS(ns, 'g');
+        g.setAttribute('class', 'node-g');
 
+        const r = n.level === 2 ? 4 : n.level === 1 ? 7 : 10;
         const circle = document.createElementNS(ns, 'circle');
         circle.setAttribute('cx', n.x);
         circle.setAttribute('cy', n.y);
-        circle.setAttribute('r', n.level === 2 ? 4 : n.level === 1 ? 7 : 10);
+        circle.setAttribute('r', r);
         circle.setAttribute('fill', n.color);
         circle.setAttribute('class', 'node-circle');
 
         const text = document.createElementNS(ns, 'text');
-        text.setAttribute('x', n.x + (n.level === 2 ? 10 : 16));
-        text.setAttribute('y', n.y + 4);
-        text.setAttribute('class', 'node-label' + (n.level === undefined ? ' root' : n.level === 1 ? ' l1' : ''));
+        text.setAttribute('x', n.x + r + 8);
+        text.setAttribute('y', n.y + 5);
+        text.setAttribute('class', 'node-label' + (!n.level ? ' root' : n.level === 1 ? ' l1' : ''));
         text.setAttribute('fill', n.color);
         text.textContent = n.name;
 
-        if (n.route) {
-            g.style.cursor = 'pointer';
+        g.appendChild(circle);
+        g.appendChild(text);
+
+        if (n.hasChildren) {
+            const isCollapsed = collapsedState[n.key];
+            const badge = document.createElementNS(ns, 'circle');
+            badge.setAttribute('cx', n.x + r + 4);
+            badge.setAttribute('cy', n.y - r - 4);
+            badge.setAttribute('r', 7);
+            badge.setAttribute('fill', isCollapsed ? n.color : 'rgba(255,255,255,0.12)');
+            badge.setAttribute('stroke', n.color);
+            badge.setAttribute('stroke-width', '1.5');
+
+            const badgeText = document.createElementNS(ns, 'text');
+            badgeText.setAttribute('x', n.x + r + 4);
+            badgeText.setAttribute('y', n.y - r - 1);
+            badgeText.setAttribute('text-anchor', 'middle');
+            badgeText.setAttribute('fill', isCollapsed ? '#fff' : n.color);
+            badgeText.setAttribute('class', 'toggle-badge');
+            badgeText.textContent = isCollapsed ? '+' : '−';
+
+            g.appendChild(badge);
+            g.appendChild(badgeText);
+
+            g.addEventListener('click', (e) => {
+                e.stopPropagation();
+                collapsedState[n.key] = !collapsedState[n.key];
+                renderMindmap();
+            });
+        } else if (n.route) {
             g.addEventListener('click', () => openModal(n.route));
         }
 
-        g.appendChild(circle);
-        g.appendChild(text);
         svg.appendChild(g);
     });
 }
