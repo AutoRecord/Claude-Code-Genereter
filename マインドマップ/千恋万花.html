@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>千恋＊万花 - ルート分岐マインドマップ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0f0a14;
+            --bg-secondary: #1a1225;
+            --bg-card: rgba(30, 20, 45, 0.85);
+            --accent-sakura: #f2a0b7;
+            --accent-gold: #d4a853;
+            --accent-purple: #9b72cf;
+            --text-primary: #e8e0f0;
+            --text-secondary: #a89bc0;
+            --yoshino: #e85d8a;
+            --mako: #6bb5e0;
+            --murasame: #b07be8;
+            --lena: #e8c84b;
+            --koharu: #6dd9a0;
+            --roka: #e89060;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ── Sakura Particles ── */
+        #sakura-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── Header ── */
+        .header {
+            position: relative; z-index: 2;
+            text-align: center; padding: 48px 20px 32px;
+            background: linear-gradient(180deg, rgba(40,20,60,0.7) 0%, transparent 100%);
+        }
+        .header h1 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-sakura), var(--accent-gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 0.1em;
+        }
+        .header p {
+            color: var(--text-secondary); font-size: 14px;
+            margin-top: 8px; letter-spacing: 0.15em;
+        }
+        .header .tag {
+            display: inline-block; margin-top: 12px;
+            padding: 4px 16px; border-radius: 20px;
+            background: rgba(242,160,183,0.15); border: 1px solid rgba(242,160,183,0.3);
+            font-size: 12px; color: var(--accent-sakura);
+        }
+
+        /* ── Main Container ── */
+        .container {
+            position: relative; z-index: 2;
+            max-width: 1200px; margin: 0 auto; padding: 0 20px 60px;
+        }
+
+        /* ── Section Title ── */
+        .section-title {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 22px; font-weight: 700;
+            color: var(--accent-gold);
+            margin: 40px 0 20px;
+            padding-left: 16px;
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        /* ── Overview Card ── */
+        .overview {
+            background: var(--bg-card);
+            border: 1px solid rgba(155,114,207,0.2);
+            border-radius: 16px; padding: 28px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 32px;
+            line-height: 1.8; font-size: 14px;
+            color: var(--text-secondary);
+        }
+        .overview strong { color: var(--accent-sakura); }
+
+        /* ── Mindmap SVG ── */
+        #mindmap-area {
+            width: 100%; overflow-x: auto;
+            background: var(--bg-card);
+            border: 1px solid rgba(155,114,207,0.15);
+            border-radius: 16px; padding: 20px;
+            backdrop-filter: blur(12px);
+            margin-bottom: 40px;
+        }
+        #mindmap-svg { width: 100%; min-height: 520px; }
+        #mindmap-svg text {
+            font-family: 'Noto Sans JP', sans-serif;
+            fill: var(--text-primary);
+        }
+        #mindmap-svg .link {
+            fill: none; stroke-width: 2.5; opacity: 0.6;
+        }
+        #mindmap-svg .node-circle {
+            cursor: pointer; transition: r 0.2s;
+        }
+        #mindmap-svg .node-circle:hover { filter: brightness(1.3); }
+        #mindmap-svg .node-label { cursor: pointer; font-size: 13px; }
+        #mindmap-svg .node-label.root { font-size: 16px; font-weight: 700; }
+        #mindmap-svg .node-label.l1 { font-size: 14px; font-weight: 700; }
+
+        /* ── Route Cards ── */
+        .route-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .route-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(155,114,207,0.15);
+            border-radius: 16px; padding: 24px;
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s, box-shadow 0.25s;
+            cursor: default;
+        }
+        .route-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+        }
+        .route-card .card-header {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 14px;
+        }
+        .route-card .dot {
+            width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+        }
+        .route-card h3 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 18px; font-weight: 700;
+        }
+        .route-card .subtitle {
+            font-size: 12px; color: var(--text-secondary);
+            margin-bottom: 12px; padding-left: 24px;
+        }
+        .route-card .summary {
+            font-size: 13px; line-height: 1.8;
+            color: var(--text-secondary);
+        }
+        .route-card .summary strong { color: var(--text-primary); }
+        .route-card .badge {
+            display: inline-block; margin-top: 12px;
+            padding: 3px 12px; border-radius: 12px;
+            font-size: 11px;
+        }
+        .badge-main  { background: rgba(232,93,138,0.15); color: var(--yoshino); border: 1px solid rgba(232,93,138,0.3); }
+        .badge-sub   { background: rgba(109,217,160,0.15); color: var(--koharu); border: 1px solid rgba(109,217,160,0.3); }
+        .badge-grand { background: rgba(232,200,75,0.15); color: var(--lena); border: 1px solid rgba(232,200,75,0.3); }
+        .badge-core  { background: rgba(176,123,232,0.15); color: var(--murasame); border: 1px solid rgba(176,123,232,0.3); }
+
+        /* ── Order Section ── */
+        .order-flow {
+            display: flex; align-items: center; flex-wrap: wrap;
+            gap: 8px; margin-top: 16px;
+        }
+        .order-item {
+            padding: 8px 18px; border-radius: 24px;
+            font-size: 13px; font-weight: 500;
+            border: 1px solid; white-space: nowrap;
+        }
+        .order-arrow {
+            color: var(--text-secondary); font-size: 18px;
+        }
+
+        /* ── Tooltip / Modal ── */
+        .modal-overlay {
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 100;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(155,114,207,0.3);
+            border-radius: 20px; padding: 32px;
+            max-width: 560px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+            animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        .modal-content h2 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: 22px; margin-bottom: 8px;
+        }
+        .modal-content .modal-sub {
+            font-size: 12px; color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+        .modal-content p {
+            font-size: 14px; line-height: 1.9; color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+        .modal-content p strong { color: var(--text-primary); }
+        .modal-close {
+            display: block; margin: 16px auto 0;
+            background: rgba(242,160,183,0.15); border: 1px solid rgba(242,160,183,0.3);
+            color: var(--accent-sakura); padding: 8px 32px;
+            border-radius: 20px; cursor: pointer; font-size: 13px;
+        }
+        .modal-close:hover { background: rgba(242,160,183,0.25); }
+
+        /* ── Footer ── */
+        .footer {
+            text-align: center; padding: 32px; font-size: 11px;
+            color: rgba(168,155,192,0.5);
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="sakura-canvas"></canvas>
+
+<header class="header">
+    <h1>千恋＊万花</h1>
+    <p>SENREN＊BANKA — ルート分岐 ＆ ストーリーマインドマップ</p>
+    <span class="tag">ゆずソフト — 2016</span>
+</header>
+
+<div class="container">
+    <!-- Overview -->
+    <div class="overview">
+        山奥の温泉街<strong>「穂織」</strong>を舞台に、神刀<strong>「叢雨丸」</strong>をへし折ってしまった主人公・<strong>有地将臣</strong>が、
+        巫女姫・朝武芳乃との婚約を機に、土地に眠る<strong>「呪い」</strong>と怪異の謎に立ち向かう和風恋愛アドベンチャー。
+        共通ルートで呪いの欠片を集めながらヒロインと絆を深め、選択肢によって6つの個別ルートへ分岐する。
+    </div>
+
+    <!-- Mindmap -->
+    <h2 class="section-title">ルート分岐マップ</h2>
+    <div id="mindmap-area">
+        <svg id="mindmap-svg" viewBox="0 0 1100 520"></svg>
+    </div>
+
+    <!-- Recommended Order -->
+    <h2 class="section-title">推奨攻略順</h2>
+    <div class="overview">
+        <div class="order-flow">
+            <span class="order-item" style="color:var(--yoshino);border-color:var(--yoshino);">① 朝武芳乃</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--koharu);border-color:var(--koharu);">② 鞍馬小春</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--roka);border-color:var(--roka);">③ 馬庭芦花</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--murasame);border-color:var(--murasame);">④ ムラサメ</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--mako);border-color:var(--mako);">⑤ 常陸茉子</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--lena);border-color:var(--lena);">⑥ レナ</span>
+        </div>
+        <p style="margin-top:14px;font-size:12px;">
+            ※ 小春・芦花はメインヒロイン1人クリア後に解禁。レナルートは全体の真相に迫るグランドエンドのため最後推奨。
+        </p>
+    </div>
+
+    <!-- Route Cards -->
+    <h2 class="section-title">各ルート要約</h2>
+    <div class="route-grid" id="route-grid"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+    <div class="modal-content">
+        <h2 id="modal-title"></h2>
+        <div class="modal-sub" id="modal-sub"></div>
+        <div id="modal-body"></div>
+        <button class="modal-close" onclick="closeModal()">閉じる</button>
+    </div>
+</div>
+
+<footer class="footer">千恋＊万花 ルート分岐マインドマップ — Fan-made reference</footer>
+
+<script>
+// ── Data ──
+const routes = [
+    {
+        id: 'yoshino', name: '朝武芳乃', nameEn: 'Yoshino Asatake',
+        color: '#e85d8a', badge: 'badge-main', badgeText: 'メインヒロイン',
+        subtitle: '穂織の巫女姫 — 婚約者',
+        summary: '代々続く<strong>「穂織の呪い」</strong>の宿命を背負う巫女姫。神刀を折った将臣との婚約から始まる王道ルート。巫女として縛られた過去、<strong>母親との関係修復</strong>、そして呪縛からの解放が描かれる。真面目さと年相応の照れ顔のギャップが魅力。',
+        detail: '芳乃は穂織の巫女姫として幼少期から厳しく育てられ、自分の感情を押し殺してきた。将臣との婚約生活を通じて少しずつ心を開き、「巫女としての自分」と「一人の女の子としての自分」の間で揺れ動く。クライマックスでは母・千景との和解と、呪いの一端を解くことに成功する。',
+        keywords: ['巫女姫', '婚約', '母との関係', '呪いの宿命', '王道ルート']
+    },
+    {
+        id: 'mako', name: '常陸茉子', nameEn: 'Mako Hitachi',
+        color: '#6bb5e0', badge: 'badge-main', badgeText: 'メインヒロイン',
+        subtitle: '朝武家に仕えるくノ一',
+        summary: '朝武家に仕える<strong>忍者の家系</strong>の少女。将臣と行動を共にする中で、憑りついた<strong>「祟り神（犬神）」</strong>に恋を教えるという使命を負う。少女漫画に憧れる純粋な一面と、献身的な忍者の二面性が魅力。',
+        detail: '茉子は忍者として芳乃を守る使命を持つが、将臣との関わりで自分自身の恋心に気づく。彼女のルートでは犬神の祟りという超常的な脅威と向き合い、「恋」という感情の力で犬神を鎮める。身体能力の高さとポンコツな恋愛観のギャップがコメディとシリアスの両面を支える。',
+        keywords: ['くノ一', '犬神', '祟り神', '恋を教える', '献身']
+    },
+    {
+        id: 'murasame', name: 'ムラサメ', nameEn: 'Murasame',
+        color: '#b07be8', badge: 'badge-core', badgeText: '物語の核心',
+        subtitle: '神刀「叢雨丸」に宿る少女',
+        summary: '神刀に宿る<strong>人ならざる存在</strong>。希薄な存在を「人として」生かしていく方法が物語の鍵。天真爛漫な彼女が<strong>人間として幸せになる過程</strong>と結末の美しさが高く評価される感動ルート。',
+        detail: 'ムラサメは叢雨丸に封じられた存在で、刀が折れたことで現世に姿を現した。人間の感情や常識を知らない彼女に将臣が寄り添い、少しずつ「生きる」ことを教えていく。存在が消滅する危機を乗り越え、人間として生きる道を見出すクライマックスは本作屈指の感動シーン。',
+        keywords: ['神刀の精', '人ならざる存在', '消滅の危機', '感動', '天真爛漫']
+    },
+    {
+        id: 'lena', name: 'レナ・リヒテナウアー', nameEn: 'Lena Liechtenauer',
+        color: '#e8c84b', badge: 'badge-grand', badgeText: 'グランドエンド',
+        subtitle: '穂織を訪れた異国の少女',
+        summary: '唯一<strong>穂織の外</strong>から来た異国のヒロイン。祟り神との<strong>対話と和解</strong>を通じて、穂織の歴史と呪いの真相に最も深く踏み込む。実質的な<strong>グランドエンド</strong>として全ての謎が収束する。',
+        detail: 'レナは異文化の視点から穂織の伝承を客観的に見つめ、呪いの本質に迫る。祟り神が生まれた経緯、穂織の民が背負ってきた業、そして叢雨丸の真の役割が明かされる。「人との繋がり」を大切にするレナの姿勢が、重いテーマを救いと希望へ導く本作の集大成。',
+        keywords: ['異文化の視点', '呪いの真相', 'グランドエンド', '対話と和解', '集大成']
+    },
+    {
+        id: 'koharu', name: '鞍馬小春', nameEn: 'Koharu Kurama',
+        color: '#6dd9a0', badge: 'badge-sub', badgeText: 'サブルート',
+        subtitle: '主人公の従妹 — 妹系ヒロイン',
+        summary: '将臣の従妹。呪い等の重い設定からは離れ、<strong>温泉街での日常</strong>とアルバイトを舞台にした純粋な恋愛関係が描かれる。「お兄ちゃん」と慕う<strong>妹系キャラ</strong>としての完成度が高い癒やしルート。',
+        detail: '小春ルートはメインストーリーの呪いとは距離を置き、日常のイチャラブに特化。短い尺ながらも密度の高い甘い展開が連続し、重い物語の合間の癒やしとして高く評価される。従妹同士の恋愛というタブー感と、それを乗り越える二人の決意が見どころ。',
+        keywords: ['従妹', '日常系', 'イチャラブ特化', '癒やし', '妹系']
+    },
+    {
+        id: 'roka', name: '馬庭芦花', nameEn: 'Roka Maniwa',
+        color: '#e89060', badge: 'badge-sub', badgeText: 'サブルート',
+        subtitle: 'しっかり者のお姉さんポジション',
+        summary: '小春と同様に<strong>日常系ルート</strong>。しっかり者の外見と、実は<strong>恋愛初心者</strong>のギャップが魅力。お姉さんらしい包容力と時折見せるポンコツさのバランスが人気。',
+        detail: '芦花は表向きしっかり者だが、恋愛経験がなく将臣を前にすると動揺する。小春との三角関係的な展開もあり、お姉さんポジションが崩れる瞬間の可愛さが見どころ。穂織の日常の温かさを存分に味わえるルート。',
+        keywords: ['お姉さん', '恋愛初心者', 'ギャップ萌え', '日常の温かさ', '包容力']
+    }
+];
+
+// ── Mindmap Tree Data ──
+const tree = {
+    name: '千恋＊万花', color: '#d4a853', x: 80, y: 260,
+    children: [
+        { name: '共通ルート', color: '#9b72cf', info: '穂織の呪い・怪異退治・欠片集め',
+          children: [
+            { name: '朝武芳乃', color: '#e85d8a', route: 'yoshino',
+              children: [
+                { name: '巫女の宿命', color: '#e85d8a' },
+                { name: '母との和解', color: '#e85d8a' },
+                { name: '呪縛からの解放', color: '#e85d8a' }
+              ]
+            },
+            { name: '常陸茉子', color: '#6bb5e0', route: 'mako',
+              children: [
+                { name: '犬神の祟り', color: '#6bb5e0' },
+                { name: '恋を教える使命', color: '#6bb5e0' }
+              ]
+            },
+            { name: 'ムラサメ', color: '#b07be8', route: 'murasame',
+              children: [
+                { name: '人ならざる存在', color: '#b07be8' },
+                { name: '消滅の危機', color: '#b07be8' },
+                { name: '人間として生きる', color: '#b07be8' }
+              ]
+            },
+            { name: 'レナ', color: '#e8c84b', route: 'lena',
+              children: [
+                { name: '呪いの真相', color: '#e8c84b' },
+                { name: '祟り神との和解', color: '#e8c84b' },
+                { name: 'グランドエンド', color: '#e8c84b' }
+              ]
+            },
+            { name: '鞍馬小春 ※要解禁', color: '#6dd9a0', route: 'koharu',
+              children: [
+                { name: '日常イチャラブ', color: '#6dd9a0' },
+                { name: '従妹の恋', color: '#6dd9a0' }
+              ]
+            },
+            { name: '馬庭芦花 ※要解禁', color: '#e89060', route: 'roka',
+              children: [
+                { name: 'お姉さんの恋愛', color: '#e89060' },
+                { name: 'ギャップ萌え', color: '#e89060' }
+              ]
+            }
+          ]
+        }
+    ]
+};
+
+// ── Render Mindmap SVG ──
+function renderMindmap() {
+    const svg = document.getElementById('mindmap-svg');
+    const ns = 'http://www.w3.org/2000/svg';
+    svg.innerHTML = '';
+
+    // Layout positions
+    const root = { x: 70, y: 260, name: tree.name, color: tree.color };
+    const common = { x: 280, y: 260, name: '共通ルート', color: '#9b72cf' };
+
+    const heroines = tree.children[0].children;
+    const hYStart = 40;
+    const hYStep = 78;
+
+    const nodes = [root, common];
+    const links = [{ from: root, to: common, color: '#9b72cf' }];
+
+    heroines.forEach((h, i) => {
+        const hy = hYStart + i * hYStep;
+        const hNode = { x: 520, y: hy, name: h.name, color: h.color, route: h.route, level: 1 };
+        nodes.push(hNode);
+        links.push({ from: common, to: hNode, color: h.color });
+
+        if (h.children) {
+            h.children.forEach((c, j) => {
+                const cy = hy - ((h.children.length - 1) * 24) / 2 + j * 24;
+                const cNode = { x: 800, y: cy, name: c.name, color: c.color, level: 2 };
+                nodes.push(cNode);
+                links.push({ from: hNode, to: cNode, color: c.color });
+            });
+        }
+    });
+
+    // Draw links
+    links.forEach(l => {
+        const path = document.createElementNS(ns, 'path');
+        const mx = (l.from.x + l.to.x) / 2;
+        path.setAttribute('d', `M${l.from.x},${l.from.y} C${mx},${l.from.y} ${mx},${l.to.y} ${l.to.x},${l.to.y}`);
+        path.setAttribute('class', 'link');
+        path.setAttribute('stroke', l.color);
+        svg.appendChild(path);
+    });
+
+    // Draw nodes
+    nodes.forEach(n => {
+        const g = document.createElementNS(ns, 'g');
+
+        const circle = document.createElementNS(ns, 'circle');
+        circle.setAttribute('cx', n.x);
+        circle.setAttribute('cy', n.y);
+        circle.setAttribute('r', n.level === 2 ? 4 : n.level === 1 ? 7 : 10);
+        circle.setAttribute('fill', n.color);
+        circle.setAttribute('class', 'node-circle');
+
+        const text = document.createElementNS(ns, 'text');
+        text.setAttribute('x', n.x + (n.level === 2 ? 10 : 16));
+        text.setAttribute('y', n.y + 4);
+        text.setAttribute('class', 'node-label' + (n.level === undefined ? ' root' : n.level === 1 ? ' l1' : ''));
+        text.setAttribute('fill', n.color);
+        text.textContent = n.name;
+
+        if (n.route) {
+            g.style.cursor = 'pointer';
+            g.addEventListener('click', () => openModal(n.route));
+        }
+
+        g.appendChild(circle);
+        g.appendChild(text);
+        svg.appendChild(g);
+    });
+}
+
+// ── Route Cards ──
+function renderCards() {
+    const grid = document.getElementById('route-grid');
+    routes.forEach(r => {
+        grid.innerHTML += `
+        <div class="route-card" onclick="openModal('${r.id}')" style="border-color:${r.color}22;">
+            <div class="card-header">
+                <div class="dot" style="background:${r.color};box-shadow:0 0 8px ${r.color}88;"></div>
+                <h3 style="color:${r.color};">${r.name}</h3>
+            </div>
+            <div class="subtitle">${r.subtitle}</div>
+            <div class="summary">${r.summary}</div>
+            <span class="badge ${r.badge}">${r.badgeText}</span>
+        </div>`;
+    });
+}
+
+// ── Modal ──
+function openModal(routeId) {
+    const r = routes.find(x => x.id === routeId);
+    if (!r) return;
+    document.getElementById('modal-title').textContent = r.name;
+    document.getElementById('modal-title').style.color = r.color;
+    document.getElementById('modal-sub').textContent = r.nameEn + ' — ' + r.subtitle;
+    let body = `<p>${r.detail}</p><p><strong>キーワード：</strong>${r.keywords.map(k => `<span style="display:inline-block;background:${r.color}18;color:${r.color};padding:2px 10px;border-radius:10px;font-size:12px;margin:3px 4px;">${k}</span>`).join('')}</p>`;
+    document.getElementById('modal-body').innerHTML = body;
+    document.getElementById('modal').classList.add('active');
+}
+function closeModal() { document.getElementById('modal').classList.remove('active'); }
+document.getElementById('modal').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// ── Sakura Particles ──
+function initSakura() {
+    const canvas = document.getElementById('sakura-canvas');
+    const ctx = canvas.getContext('2d');
+    let W, H;
+    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+    resize(); window.addEventListener('resize', resize);
+
+    const petals = Array.from({ length: 35 }, () => ({
+        x: Math.random() * W, y: Math.random() * H,
+        size: 3 + Math.random() * 5, speed: 0.3 + Math.random() * 0.7,
+        drift: Math.random() * 0.5 - 0.25, rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.02, opacity: 0.15 + Math.random() * 0.25
+    }));
+
+    function draw() {
+        ctx.clearRect(0, 0, W, H);
+        petals.forEach(p => {
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            ctx.globalAlpha = p.opacity;
+            ctx.fillStyle = '#f2a0b7';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+            p.y += p.speed;
+            p.x += p.drift + Math.sin(p.y * 0.01) * 0.3;
+            p.rot += p.rotSpeed;
+            if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; }
+        });
+        requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+// ── Init ──
+renderMindmap();
+renderCards();
+initSakura();
+</script>
+</body>
+</html>
