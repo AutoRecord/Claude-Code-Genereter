@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>喫茶ステラと死神の蝶 - ルート分岐マインドマップ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#0c0810;--bg2:#14101e;--card:rgba(20,16,34,0.88);--accent:#e8a0c8;--accent2:#8b5cf6;--gold:#f0c060;--text:#f0e8f4;--sub:#a898b8;--kanna:#e06890;--natsume:#9b72e8;--nozomi:#60b8e0;--mei:#f0a050;--suzune:#50c8a0}
+        body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+        #particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+        .header{position:relative;z-index:2;text-align:center;padding:48px 20px 32px;background:linear-gradient(180deg,rgba(20,16,34,0.85) 0%,transparent 100%)}
+        .header h1{font-family:'Noto Serif JP',serif;font-size:clamp(24px,4.5vw,42px);font-weight:900;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.08em}
+        .header .en-title{font-size:12px;color:var(--accent);letter-spacing:0.3em;margin-top:4px;opacity:0.8}
+        .header p{color:var(--sub);font-size:14px;margin-top:8px;letter-spacing:0.12em}
+        .header .tag{display:inline-block;margin-top:12px;padding:4px 16px;border-radius:20px;background:rgba(232,160,200,0.1);border:1px solid rgba(232,160,200,0.25);font-size:12px;color:var(--accent)}
+        .container{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 20px 60px}
+        .section-title{font-family:'Noto Serif JP',serif;font-size:22px;font-weight:700;color:var(--gold);margin:40px 0 20px;padding-left:16px;border-left:3px solid var(--gold)}
+        .overview{background:var(--card);border:1px solid rgba(232,160,200,0.15);border-radius:16px;padding:28px;backdrop-filter:blur(12px);margin-bottom:32px;line-height:1.8;font-size:14px;color:var(--sub)}
+        .overview strong{color:var(--accent)}
+        #mindmap-area{width:100%;overflow-x:auto;background:var(--card);border:1px solid rgba(232,160,200,0.12);border-radius:16px;padding:20px;backdrop-filter:blur(12px);margin-bottom:8px}
+        #mindmap-svg{width:100%;min-height:200px;transition:min-height 0.4s ease}
+        #mindmap-svg .link{fill:none;stroke-width:2.5;opacity:0.6;transition:opacity 0.3s}
+        #mindmap-svg .node-g{cursor:pointer;transition:opacity 0.3s}
+        #mindmap-svg .node-circle{transition:r 0.2s,filter 0.2s}
+        #mindmap-svg .node-g:hover .node-circle{filter:brightness(1.3)}
+        #mindmap-svg .node-label{font-size:13px;font-family:'Noto Sans JP',sans-serif}
+        #mindmap-svg .node-label.root{font-size:15px;font-weight:700}
+        #mindmap-svg .node-label.l1{font-size:14px;font-weight:700}
+        #mindmap-svg .toggle-badge{font-size:10px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;user-select:none}
+        .mindmap-hint{text-align:center;font-size:12px;color:var(--sub);margin-bottom:40px;opacity:0.7}
+        .route-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+        .route-card{background:var(--card);border:1px solid rgba(232,160,200,0.12);border-radius:16px;padding:24px;backdrop-filter:blur(12px);transition:transform 0.25s,box-shadow 0.25s;cursor:default}
+        .route-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.45)}
+        .route-card .card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+        .route-card .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+        .route-card h3{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700}
+        .route-card .subtitle{font-size:12px;color:var(--sub);margin-bottom:12px;padding-left:24px}
+        .route-card .summary{font-size:13px;line-height:1.8;color:var(--sub)}
+        .route-card .summary strong{color:var(--text)}
+        .route-card .badge{display:inline-block;margin-top:12px;padding:3px 12px;border-radius:12px;font-size:11px}
+        .badge-main{background:rgba(224,104,144,0.12);color:var(--kanna);border:1px solid rgba(224,104,144,0.25)}
+        .badge-sub{background:rgba(80,200,160,0.12);color:var(--suzune);border:1px solid rgba(80,200,160,0.25)}
+        .badge-core{background:rgba(155,114,232,0.12);color:var(--natsume);border:1px solid rgba(155,114,232,0.25)}
+        .order-flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:16px}
+        .order-item{padding:8px 18px;border-radius:24px;font-size:13px;font-weight:500;border:1px solid;white-space:nowrap}
+        .order-arrow{color:var(--sub);font-size:18px}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:100;align-items:center;justify-content:center}
+        .modal-overlay.active{display:flex}
+        .modal-content{background:var(--bg2);border:1px solid rgba(232,160,200,0.25);border-radius:20px;padding:32px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;animation:modalIn 0.3s ease}
+        @keyframes modalIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+        .modal-content h2{font-family:'Noto Serif JP',serif;font-size:22px;margin-bottom:8px}
+        .modal-content .modal-sub{font-size:12px;color:var(--sub);margin-bottom:16px}
+        .modal-content p{font-size:14px;line-height:1.9;color:var(--sub);margin-bottom:12px}
+        .modal-content p strong{color:var(--text)}
+        .modal-close{display:block;margin:16px auto 0;background:rgba(232,160,200,0.1);border:1px solid rgba(232,160,200,0.25);color:var(--accent);padding:8px 32px;border-radius:20px;cursor:pointer;font-size:13px}
+        .modal-close:hover{background:rgba(232,160,200,0.2)}
+        .footer{text-align:center;padding:32px;font-size:11px;color:rgba(168,152,184,0.4)}
+    </style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+<header class="header">
+    <h1>喫茶ステラと死神の蝶</h1>
+    <div class="en-title">CAFÉ STELLA AND THE REAPER'S BUTTERFLIES</div>
+    <p>ルート分岐 ＆ ストーリーマインドマップ</p>
+    <span class="tag">ゆずソフト — 2019</span>
+</header>
+<div class="container">
+    <div class="overview">
+        事故で一度命を落とした主人公・<strong>高嶺昂晴</strong>は、死神<strong>「明月栞那」</strong>と喋る猫<strong>「ミカド」</strong>に出会う。
+        死の運命から逃れるためには<strong>「喫茶店をオープンさせること」</strong>が必要だと告げられ、
+        仲間たちと<strong>「喫茶ステラ」</strong>の立ち上げに挑む——死と隣り合わせの温かい日常系ラブコメ。
+    </div>
+    <h2 class="section-title">ルート分岐マップ</h2>
+    <div id="mindmap-area"><svg id="mindmap-svg"></svg></div>
+    <div class="mindmap-hint">💡 ノードをクリックして分岐を開閉できます</div>
+    <h2 class="section-title">推奨攻略順</h2>
+    <div class="overview">
+        <div class="order-flow">
+            <span class="order-item" style="color:var(--mei);border-color:var(--mei);">① 火打谷愛衣</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--suzune);border-color:var(--suzune);">② 汐山涼音</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--nozomi);border-color:var(--nozomi);">③ 墨染希</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--natsume);border-color:var(--natsume);">④ 四季ナツメ</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--kanna);border-color:var(--kanna);">⑤ 明月栞那</span>
+        </div>
+        <p style="margin-top:14px;font-size:12px;">※ 涼音ルートはメイン1人クリア後に解禁。栞那は死神との運命に向き合う核心ルートのため最後推奨。</p>
+    </div>
+    <h2 class="section-title">各ルート要約</h2>
+    <div class="route-grid" id="route-grid"></div>
+</div>
+<div class="modal-overlay" id="modal"><div class="modal-content"><h2 id="modal-title"></h2><div class="modal-sub" id="modal-sub"></div><div id="modal-body"></div><button class="modal-close" onclick="closeModal()">閉じる</button></div></div>
+<footer class="footer">喫茶ステラと死神の蝶 ルート分岐マインドマップ — Fan-made reference</footer>
+<script>
+const routes=[
+    {id:'kanna',name:'明月栞那',nameEn:'Kanna Akizuki',color:'#e06890',badge:'badge-main',badgeText:'メイン / 核心ルート',subtitle:'死神の少女 — 主人公の運命を管理する存在',
+     summary:'<strong>死神</strong>として主人公の死の運命を管理するヒロイン。物語の<strong>核心</strong>に直結し、積み重ねられた<strong>重い過去</strong>を抱える。二人がどのように幸せを掴み、家族を築いていくかが描かれる。',
+     detail:'栞那は長い年月を死神として過ごし、多くの命の終わりを見届けてきた。昂晴との出会いで初めて「人間として生きたい」という願いを抱くが、死神としての役割との矛盾に苦しむ。全ルートの伏線が収束する集大成であり、切ないながらも温かい結末が待つ。',
+     keywords:['死神','運命','重い過去','集大成','家族']},
+    {id:'natsume',name:'四季ナツメ',nameEn:'Natsume Shiki',color:'#9b72e8',badge:'badge-core',badgeText:'物語の深層',subtitle:'クールだが表情豊かな「めんどくさ可愛い」ヒロイン',
+     summary:'クールな見た目だが<strong>表情が豊か</strong>で「<strong>めんどくさ可愛い</strong>」と評されるヒロイン。昂晴との掛け合いが楽しく、ヒロインの<strong>可愛さが存分に味わえる</strong>ルート。',
+     detail:'ナツメは一見クールだが、好きな人の前では素直になれない不器用さがある。喫茶ステラでの日常を通じて少しずつ心を開いていく過程が丁寧に描かれる。「めんどくさい」と言いながら暁晴のことが気になって仕方ない姿が人気の秘密。',
+     keywords:['クール','めんどくさ可愛い','不器用','表情豊か','ギャップ']},
+    {id:'nozomi',name:'墨染希',nameEn:'Nozomi Sumizome',color:'#60b8e0',badge:'badge-main',badgeText:'メインヒロイン',subtitle:'主人公の幼馴染 — 頼れる理解者',
+     summary:'昂晴の<strong>幼馴染</strong>で、明るく頼りになる存在。主人公の過去を知る数少ない<strong>理解者</strong>。告白シーンなどが<strong>王道</strong>で、幼馴染らしい絆の強さが描かれる。',
+     detail:'希は幼馴染として昂晴をずっと近くで見守ってきた。喫茶ステラの立ち上げにも積極的に協力し、自然体の関係からゆっくりと恋愛に発展していく過程が丁寧。王道かつ安心感のある展開で、昂晴の過去を受け入れる包容力が魅力。',
+     keywords:['幼馴染','理解者','王道展開','包容力','自然体']},
+    {id:'mei',name:'火打谷愛衣',nameEn:'Mei Hiuchidani',color:'#f0a050',badge:'badge-main',badgeText:'メインヒロイン',subtitle:'不思議な「力」を持つ少女',
+     summary:'<strong>超能力的な要素</strong>が絡む不思議なルート。うぶな雰囲気が強いが、物語を通じて自分の<strong>「力」</strong>や周りとの関係に向き合っていく姿が印象的。',
+     detail:'愛衣は自分でも制御しきれない不思議な力を持ち、それが原因で人と距離を置いてきた。昂晴の温かさに触れ、力を恐れずに受け入れてくれる存在を見出す。うぶで純粋な性格と、力に翻弄される切なさのコントラストが見どころ。',
+     keywords:['超能力','うぶ','不思議な力','自己受容','純粋']},
+    {id:'suzune',name:'汐山涼音',nameEn:'Suzune Shioyama',color:'#50c8a0',badge:'badge-sub',badgeText:'サブヒロイン（要解禁）',subtitle:'キッチンスタッフ — 落ち着いた大人の魅力',
+     summary:'喫茶ステラの<strong>キッチンスタッフ</strong>。他ヒロイン1人クリアで解禁。<strong>落ち着いた大人の魅力</strong>があり、喫茶店の運営や<strong>過去との向き合い方</strong>が丁寧に描かれる。',
+     detail:'涼音は料理の腕前で喫茶ステラを支える縁の下の力持ち。年上ならではの落ち着きと、恋愛に関しては意外と不器用な一面のギャップが魅力。過去に抱えた挫折と、喫茶店を通じて再び夢を追いかける姿が感動を誘う。',
+     keywords:['キッチンスタッフ','大人の魅力','過去の挫折','年上','料理']}
+];
+const tree={name:'喫茶ステラと死神の蝶',color:'#e8a0c8',children:[{name:'共通ルート',color:'#8b5cf6',children:[
+    {name:'明月栞那',color:'#e06890',route:'kanna',children:[{name:'死神の運命',color:'#e06890'},{name:'重い過去',color:'#e06890'},{name:'家族の形',color:'#e06890'}]},
+    {name:'四季ナツメ',color:'#9b72e8',route:'natsume',children:[{name:'めんどくさ可愛い',color:'#9b72e8'},{name:'不器用な恋',color:'#9b72e8'}]},
+    {name:'墨染希',color:'#60b8e0',route:'nozomi',children:[{name:'幼馴染の絆',color:'#60b8e0'},{name:'王道の告白',color:'#60b8e0'}]},
+    {name:'火打谷愛衣',color:'#f0a050',route:'mei',children:[{name:'不思議な力',color:'#f0a050'},{name:'自己受容',color:'#f0a050'}]},
+    {name:'汐山涼音 ※要解禁',color:'#50c8a0',route:'suzune',children:[{name:'過去の挫折',color:'#50c8a0'},{name:'再び夢へ',color:'#50c8a0'}]}
+]}]};
+const collapsedState={};function nodeKey(l,i){return l+'-'+i}
+function renderMindmap(){const svg=document.getElementById('mindmap-svg'),ns='http://www.w3.org/2000/svg';svg.innerHTML='';const nodes=[],links=[],heroines=tree.children[0].children;let currentY=40;const rowH=32,rootKey=nodeKey(0,0),commonKey=nodeKey(1,0),rootC=collapsedState[rootKey],commonC=collapsedState[commonKey],groups=[];if(!rootC&&!commonC){heroines.forEach((h,i)=>{const hKey=nodeKey(2,i),hC=collapsedState[hKey],cc=(!hC&&h.children)?h.children.length:0,gh=Math.max(1,cc)*rowH;groups.push({h,i,hKey,hC,cc,y:0,gh})});groups.forEach(g=>{g.y=currentY+g.gh/2;currentY+=g.gh+12})}const totalH=Math.max(currentY+20,100),midY=totalH/2;const rootNode={x:70,y:midY,name:tree.name,color:tree.color,key:rootKey,hasChildren:true};nodes.push(rootNode);if(!rootC){const commonNode={x:310,y:midY,name:'共通ルート',color:'#8b5cf6',level:1,key:commonKey,hasChildren:true};nodes.push(commonNode);links.push({from:rootNode,to:commonNode,color:'#8b5cf6'});if(!commonC){groups.forEach(g=>{const hNode={x:530,y:g.y,name:g.h.name,color:g.h.color,route:g.h.route,level:1,key:g.hKey,hasChildren:!!(g.h.children&&g.h.children.length)};nodes.push(hNode);links.push({from:commonNode,to:hNode,color:g.h.color});if(!g.hC&&g.h.children){g.h.children.forEach((c,j)=>{const cy=g.y-((g.cc-1)*rowH)/2+j*rowH;const cNode={x:790,y:cy,name:c.name,color:c.color,level:2};nodes.push(cNode);links.push({from:hNode,to:cNode,color:c.color})})}})}}svg.setAttribute('viewBox',`0 0 1080 ${totalH}`);svg.style.minHeight=totalH+'px';links.forEach(l=>{const path=document.createElementNS(ns,'path'),mx=(l.from.x+l.to.x)/2;path.setAttribute('d',`M${l.from.x},${l.from.y} C${mx},${l.from.y} ${mx},${l.to.y} ${l.to.x},${l.to.y}`);path.setAttribute('class','link');path.setAttribute('stroke',l.color);svg.appendChild(path)});nodes.forEach(n=>{const g=document.createElementNS(ns,'g');g.setAttribute('class','node-g');const r=n.level===2?4:n.level===1?7:10;const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',n.x);circle.setAttribute('cy',n.y);circle.setAttribute('r',r);circle.setAttribute('fill',n.color);circle.setAttribute('class','node-circle');const text=document.createElementNS(ns,'text');text.setAttribute('x',n.x+r+8);text.setAttribute('y',n.y+5);text.setAttribute('class','node-label'+(!n.level?' root':n.level===1?' l1':''));text.setAttribute('fill',n.color);text.textContent=n.name;g.appendChild(circle);g.appendChild(text);if(n.hasChildren){const isC=collapsedState[n.key];const badge=document.createElementNS(ns,'circle');badge.setAttribute('cx',n.x+r+4);badge.setAttribute('cy',n.y-r-4);badge.setAttribute('r',7);badge.setAttribute('fill',isC?n.color:'rgba(255,255,255,0.12)');badge.setAttribute('stroke',n.color);badge.setAttribute('stroke-width','1.5');const bt=document.createElementNS(ns,'text');bt.setAttribute('x',n.x+r+4);bt.setAttribute('y',n.y-r-1);bt.setAttribute('text-anchor','middle');bt.setAttribute('fill',isC?'#fff':n.color);bt.setAttribute('class','toggle-badge');bt.textContent=isC?'+':'−';g.appendChild(badge);g.appendChild(bt);g.addEventListener('click',e=>{e.stopPropagation();collapsedState[n.key]=!collapsedState[n.key];renderMindmap()})}else if(n.route){g.addEventListener('click',()=>openModal(n.route))}svg.appendChild(g)})}
+function renderCards(){const grid=document.getElementById('route-grid');routes.forEach(r=>{grid.innerHTML+=`<div class="route-card" onclick="openModal('${r.id}')" style="border-color:${r.color}22;"><div class="card-header"><div class="dot" style="background:${r.color};box-shadow:0 0 8px ${r.color}88;"></div><h3 style="color:${r.color};">${r.name}</h3></div><div class="subtitle">${r.subtitle}</div><div class="summary">${r.summary}</div><span class="badge ${r.badge}">${r.badgeText}</span></div>`})}
+function openModal(id){const r=routes.find(x=>x.id===id);if(!r)return;document.getElementById('modal-title').textContent=r.name;document.getElementById('modal-title').style.color=r.color;document.getElementById('modal-sub').textContent=r.nameEn+' — '+r.subtitle;document.getElementById('modal-body').innerHTML=`<p>${r.detail}</p><p><strong>キーワード：</strong>${r.keywords.map(k=>`<span style="display:inline-block;background:${r.color}18;color:${r.color};padding:2px 10px;border-radius:10px;font-size:12px;margin:3px 4px;">${k}</span>`).join('')}</p>`;document.getElementById('modal').classList.add('active')}
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+function initParticles(){const canvas=document.getElementById('particle-canvas'),ctx=canvas.getContext('2d');let W,H;function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}resize();window.addEventListener('resize',resize);const ps=Array.from({length:30},()=>({x:Math.random()*W,y:Math.random()*H,size:2+Math.random()*4,speed:0.1+Math.random()*0.25,drift:(Math.random()-0.5)*0.15,opacity:0.06+Math.random()*0.15,rot:Math.random()*Math.PI*2,rotS:(Math.random()-0.5)*0.015}));function draw(){ctx.clearRect(0,0,W,H);ps.forEach(p=>{ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalAlpha=p.opacity;ctx.fillStyle='#e8a0c8';ctx.beginPath();ctx.moveTo(0,-p.size);ctx.bezierCurveTo(p.size,-p.size/2,p.size,p.size/2,0,p.size);ctx.bezierCurveTo(-p.size,p.size/2,-p.size,-p.size/2,0,-p.size);ctx.fill();ctx.restore();p.y+=p.speed;p.x+=p.drift+Math.sin(p.y*0.008)*0.2;p.rot+=p.rotS;if(p.y>H+15){p.y=-15;p.x=Math.random()*W}});requestAnimationFrame(draw)}draw()}
+renderMindmap();renderCards();initParticles();
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIDDLE JOKER - ルート分岐マインドマップ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{--bg:#080b15;--bg2:#0e1225;--card:rgba(14,18,42,0.88);--accent:#00d4ff;--accent2:#7c3aed;--gold:#fbbf24;--text:#e0eaf0;--sub:#8898b8;--ayase:#ff6b9d;--mayu:#b07be8;--hazuki:#fbbf24;--nanami:#60d4a0;--chisaki:#ff8c42}
+        body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+        #particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+        .header{position:relative;z-index:2;text-align:center;padding:48px 20px 32px;background:linear-gradient(180deg,rgba(12,15,40,0.85) 0%,transparent 100%)}
+        .header h1{font-family:'Noto Serif JP',serif;font-size:clamp(28px,5vw,48px);font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:0.12em}
+        .header .en-title{font-size:13px;color:var(--accent);letter-spacing:0.35em;margin-top:4px;opacity:0.8}
+        .header p{color:var(--sub);font-size:14px;margin-top:8px;letter-spacing:0.12em}
+        .header .tag{display:inline-block;margin-top:12px;padding:4px 16px;border-radius:20px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);font-size:12px;color:var(--accent)}
+        .container{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 20px 60px}
+        .section-title{font-family:'Noto Serif JP',serif;font-size:22px;font-weight:700;color:var(--gold);margin:40px 0 20px;padding-left:16px;border-left:3px solid var(--gold)}
+        .overview{background:var(--card);border:1px solid rgba(0,212,255,0.15);border-radius:16px;padding:28px;backdrop-filter:blur(12px);margin-bottom:32px;line-height:1.8;font-size:14px;color:var(--sub)}
+        .overview strong{color:var(--accent)}
+        #mindmap-area{width:100%;overflow-x:auto;background:var(--card);border:1px solid rgba(0,212,255,0.12);border-radius:16px;padding:20px;backdrop-filter:blur(12px);margin-bottom:8px}
+        #mindmap-svg{width:100%;min-height:200px;transition:min-height 0.4s ease}
+        #mindmap-svg .link{fill:none;stroke-width:2.5;opacity:0.6;transition:opacity 0.3s}
+        #mindmap-svg .node-g{cursor:pointer;transition:opacity 0.3s}
+        #mindmap-svg .node-circle{transition:r 0.2s,filter 0.2s}
+        #mindmap-svg .node-g:hover .node-circle{filter:brightness(1.3)}
+        #mindmap-svg .node-label{font-size:13px;font-family:'Noto Sans JP',sans-serif}
+        #mindmap-svg .node-label.root{font-size:16px;font-weight:700}
+        #mindmap-svg .node-label.l1{font-size:14px;font-weight:700}
+        #mindmap-svg .toggle-badge{font-size:10px;font-weight:700;font-family:'Noto Sans JP',sans-serif;cursor:pointer;user-select:none}
+        .mindmap-hint{text-align:center;font-size:12px;color:var(--sub);margin-bottom:40px;opacity:0.7}
+        .route-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px}
+        .route-card{background:var(--card);border:1px solid rgba(0,212,255,0.12);border-radius:16px;padding:24px;backdrop-filter:blur(12px);transition:transform 0.25s,box-shadow 0.25s;cursor:default}
+        .route-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.45)}
+        .route-card .card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+        .route-card .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+        .route-card h3{font-family:'Noto Serif JP',serif;font-size:18px;font-weight:700}
+        .route-card .subtitle{font-size:12px;color:var(--sub);margin-bottom:12px;padding-left:24px}
+        .route-card .summary{font-size:13px;line-height:1.8;color:var(--sub)}
+        .route-card .summary strong{color:var(--text)}
+        .route-card .badge{display:inline-block;margin-top:12px;padding:3px 12px;border-radius:12px;font-size:11px}
+        .badge-main{background:rgba(255,107,157,0.12);color:var(--ayase);border:1px solid rgba(255,107,157,0.25)}
+        .badge-sub{background:rgba(96,212,160,0.12);color:var(--nanami);border:1px solid rgba(96,212,160,0.25)}
+        .badge-core{background:rgba(176,123,232,0.12);color:var(--mayu);border:1px solid rgba(176,123,232,0.25)}
+        .order-flow{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:16px}
+        .order-item{padding:8px 18px;border-radius:24px;font-size:13px;font-weight:500;border:1px solid;white-space:nowrap}
+        .order-arrow{color:var(--sub);font-size:18px}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.65);z-index:100;align-items:center;justify-content:center}
+        .modal-overlay.active{display:flex}
+        .modal-content{background:var(--bg2);border:1px solid rgba(0,212,255,0.25);border-radius:20px;padding:32px;max-width:560px;width:90%;max-height:80vh;overflow-y:auto;animation:modalIn 0.3s ease}
+        @keyframes modalIn{from{opacity:0;transform:scale(0.92)}to{opacity:1;transform:scale(1)}}
+        .modal-content h2{font-family:'Noto Serif JP',serif;font-size:22px;margin-bottom:8px}
+        .modal-content .modal-sub{font-size:12px;color:var(--sub);margin-bottom:16px}
+        .modal-content p{font-size:14px;line-height:1.9;color:var(--sub);margin-bottom:12px}
+        .modal-content p strong{color:var(--text)}
+        .modal-close{display:block;margin:16px auto 0;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.25);color:var(--accent);padding:8px 32px;border-radius:20px;cursor:pointer;font-size:13px}
+        .modal-close:hover{background:rgba(0,212,255,0.2)}
+        .footer{text-align:center;padding:32px;font-size:11px;color:rgba(136,152,184,0.4)}
+    </style>
+</head>
+<body>
+<canvas id="particle-canvas"></canvas>
+<header class="header">
+    <h1>RIDDLE JOKER</h1>
+    <div class="en-title">リドルジョーカー</div>
+    <p>ルート分岐 ＆ ストーリーマインドマップ</p>
+    <span class="tag">ゆずソフト — 2018</span>
+</header>
+<div class="container">
+    <div class="overview">
+        <strong>「アストラル能力」</strong>が科学的に証明された現代。秘匿組織のエージェント・<strong>在原暁</strong>は、
+        義妹の七海と共にアストラル研究の最先端<strong>「橘花学院」</strong>に生徒として潜入する。
+        学園のアイドル・三司あやせに正体を見破られるハプニングから、学園に潜む<strong>闇</strong>と
+        ヒロインたちの秘密に巻き込まれていく——潜入モノ×学園ラブコメ。
+    </div>
+    <h2 class="section-title">ルート分岐マップ</h2>
+    <div id="mindmap-area"><svg id="mindmap-svg"></svg></div>
+    <div class="mindmap-hint">💡 ノードをクリックして分岐を開閉できます</div>
+
+    <h2 class="section-title">推奨攻略順</h2>
+    <div class="overview">
+        <div class="order-flow">
+            <span class="order-item" style="color:var(--hazuki);border-color:var(--hazuki);">① 二条院羽月</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--nanami);border-color:var(--nanami);">② 在原七海</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--chisaki);border-color:var(--chisaki);">③ 壬生千咲</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--mayu);border-color:var(--mayu);">④ 式部茉優</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--ayase);border-color:var(--ayase);">⑤ 三司あやせ</span>
+        </div>
+        <p style="margin-top:14px;font-size:12px;">※ 千咲ルートはメイン1人クリア後に解禁。茉優・あやせは物語の核心に触れるため後半推奨。</p>
+    </div>
+    <h2 class="section-title">各ルート要約</h2>
+    <div class="route-grid" id="route-grid"></div>
+</div>
+<div class="modal-overlay" id="modal"><div class="modal-content"><h2 id="modal-title"></h2><div class="modal-sub" id="modal-sub"></div><div id="modal-body"></div><button class="modal-close" onclick="closeModal()">閉じる</button></div></div>
+<footer class="footer">RIDDLE JOKER ルート分岐マインドマップ — Fan-made reference</footer>
+<script>
+const routes=[
+    {id:'ayase',name:'三司あやせ',nameEn:'Ayase Mitsukasa',color:'#ff6b9d',badge:'badge-main',badgeText:'メイン / 真相ルート',subtitle:'学園のアイドル — 正体を見破った少女',
+     summary:'学園のアイドル的存在。暁の<strong>潜入工作員としての正体を見破り</strong>、秘密の共有者となる。ルートに入ると「化けの皮」が剥がれ、テンポの良いコントのような掛け合いが展開。<strong>物語の核心</strong>に最も深く関わる。',
+     detail:'あやせは表向き完璧なアイドルだが、暁に正体を見抜かれた後は本来の毒舌で面白い性格が露わになる。彼女のルートでは学園に隠された最大の秘密と、アストラル能力の社会的な問題が明かされる。暁との信頼関係の構築と、互いの弱さを認め合う過程が見どころ。本作の実質的な真相ルート。',
+     keywords:['学園のアイドル','正体バレ','毒舌ヒロイン','真相ルート','信頼関係']},
+    {id:'mayu',name:'式部茉優',nameEn:'Mayu Shikibe',color:'#b07be8',badge:'badge-core',badgeText:'物語の核心',subtitle:'ミステリアスな研究者の先輩',
+     summary:'研究室を持つ<strong>ミステリアスな先輩</strong>。シナリオ評価が非常に高く、物語の<strong>真相に迫る重要な役割</strong>を担う。あやせルートと並んで後半の攻略が推奨される。',
+     detail:'茉優はアストラル能力に関する独自の研究を行っており、その研究が学園の闇と深く結びついている。クールで知的な外見の裏に隠された彼女の過去と、暁との恋愛模様がシリアスかつ丁寧に描かれる。物語の謎を紐解く鍵を多く握るルート。',
+     keywords:['研究者','ミステリアス','学園の闇','高評価シナリオ','先輩']},
+    {id:'hazuki',name:'二条院羽月',nameEn:'Hazuki Nijouin',color:'#fbbf24',badge:'badge-main',badgeText:'メインヒロイン',subtitle:'育ちの良いお嬢様 — 意外なギャップ',
+     summary:'育ちの良い<strong>お嬢様</strong>タイプだが、意外な<strong>ギャップ</strong>（ムッツリなど）を持つ。日常パートと任務パートのバランスが楽しめる。アストラル能力への<strong>偏見</strong>と向き合うルート。',
+     detail:'羽月は名家の令嬢として厳格に育てられたが、アストラル能力者であることを隠して生きている。暁との関わりを通じて、自分の能力を受け入れ、家族や社会の偏見と向き合う決意をする。お嬢様らしい上品さとムッツリなギャップが人気。',
+     keywords:['お嬢様','ギャップ萌え','アストラルの偏見','名家の秘密','ムッツリ']},
+    {id:'nanami',name:'在原七海',nameEn:'Nanami Arihara',color:'#60d4a0',badge:'badge-main',badgeText:'メインヒロイン',subtitle:'主人公の義妹 — 家事上手な潜入パートナー',
+     summary:'暁の<strong>義妹</strong>で潜入任務のパートナー。家事が得意で兄に甘い<strong>妹属性</strong>を体現。ヒロインとしての魅力が非常に高く、ユーザーからの<strong>人気No.1</strong>。',
+     detail:'七海は暁と血の繋がらない義妹として、共に組織のエージェント活動を行う。兄への恋心と任務の間で揺れ動く姿が丁寧に描かれる。妹系ヒロインとしての完成度が極めて高く、甘い日常と緊迫した任務のコントラストが見どころ。',
+     keywords:['義妹','潜入パートナー','人気No.1','家事上手','兄への恋心']},
+    {id:'chisaki',name:'壬生千咲',nameEn:'Chisaki Mibu',color:'#ff8c42',badge:'badge-sub',badgeText:'サブヒロイン（要解禁）',subtitle:'明るいムードメーカーの後輩',
+     summary:'明るく人懐っこい<strong>後輩</strong>キャラ。「<strong>光属性</strong>」と評されるムードメーカー。他ヒロイン1人クリア後に解禁。重い設定から離れた<strong>癒やし系</strong>ルート。',
+     detail:'千咲は物語の重い設定から一歩離れ、学園生活と恋愛を純粋に楽しめるルート。先輩である暁に対する一途な想いと、明るさの裏にある少しの不安が丁寧に描かれる。重厚なメインルートの合間の癒やしとして高く評価されている。',
+     keywords:['後輩','光属性','ムードメーカー','癒やし','一途']}
+];
+const tree={name:'RIDDLE JOKER',color:'#00d4ff',children:[{name:'共通ルート',color:'#7c3aed',children:[
+    {name:'三司あやせ',color:'#ff6b9d',route:'ayase',children:[{name:'正体バレ',color:'#ff6b9d'},{name:'学園の最大の秘密',color:'#ff6b9d'},{name:'真相ルート',color:'#ff6b9d'}]},
+    {name:'式部茉優',color:'#b07be8',route:'mayu',children:[{name:'独自研究',color:'#b07be8'},{name:'学園の闇',color:'#b07be8'}]},
+    {name:'二条院羽月',color:'#fbbf24',route:'hazuki',children:[{name:'お嬢様の秘密',color:'#fbbf24'},{name:'アストラルの偏見',color:'#fbbf24'}]},
+    {name:'在原七海',color:'#60d4a0',route:'nanami',children:[{name:'義妹の恋心',color:'#60d4a0'},{name:'潜入任務',color:'#60d4a0'}]},
+    {name:'壬生千咲 ※要解禁',color:'#ff8c42',route:'chisaki',children:[{name:'後輩の一途な想い',color:'#ff8c42'},{name:'光属性の癒やし',color:'#ff8c42'}]}
+]}]};
+
+const collapsedState={};
+function nodeKey(l,i){return l+'-'+i}
+function renderMindmap(){const svg=document.getElementById('mindmap-svg'),ns='http://www.w3.org/2000/svg';svg.innerHTML='';const nodes=[],links=[],heroines=tree.children[0].children;let currentY=40;const rowH=32,rootKey=nodeKey(0,0),commonKey=nodeKey(1,0),rootC=collapsedState[rootKey],commonC=collapsedState[commonKey],groups=[];if(!rootC&&!commonC){heroines.forEach((h,i)=>{const hKey=nodeKey(2,i),hC=collapsedState[hKey],cc=(!hC&&h.children)?h.children.length:0,gh=Math.max(1,cc)*rowH;groups.push({h,i,hKey,hC,cc,y:0,gh})});groups.forEach(g=>{g.y=currentY+g.gh/2;currentY+=g.gh+12})}const totalH=Math.max(currentY+20,100),midY=totalH/2;const rootNode={x:70,y:midY,name:tree.name,color:tree.color,key:rootKey,hasChildren:true};nodes.push(rootNode);if(!rootC){const commonNode={x:260,y:midY,name:'共通ルート',color:'#7c3aed',level:1,key:commonKey,hasChildren:true};nodes.push(commonNode);links.push({from:rootNode,to:commonNode,color:'#7c3aed'});if(!commonC){groups.forEach(g=>{const hNode={x:490,y:g.y,name:g.h.name,color:g.h.color,route:g.h.route,level:1,key:g.hKey,hasChildren:!!(g.h.children&&g.h.children.length)};nodes.push(hNode);links.push({from:commonNode,to:hNode,color:g.h.color});if(!g.hC&&g.h.children){g.h.children.forEach((c,j)=>{const cy=g.y-((g.cc-1)*rowH)/2+j*rowH;const cNode={x:760,y:cy,name:c.name,color:c.color,level:2};nodes.push(cNode);links.push({from:hNode,to:cNode,color:c.color})})}})}}svg.setAttribute('viewBox',`0 0 1050 ${totalH}`);svg.style.minHeight=totalH+'px';links.forEach(l=>{const path=document.createElementNS(ns,'path'),mx=(l.from.x+l.to.x)/2;path.setAttribute('d',`M${l.from.x},${l.from.y} C${mx},${l.from.y} ${mx},${l.to.y} ${l.to.x},${l.to.y}`);path.setAttribute('class','link');path.setAttribute('stroke',l.color);svg.appendChild(path)});nodes.forEach(n=>{const g=document.createElementNS(ns,'g');g.setAttribute('class','node-g');const r=n.level===2?4:n.level===1?7:10;const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',n.x);circle.setAttribute('cy',n.y);circle.setAttribute('r',r);circle.setAttribute('fill',n.color);circle.setAttribute('class','node-circle');const text=document.createElementNS(ns,'text');text.setAttribute('x',n.x+r+8);text.setAttribute('y',n.y+5);text.setAttribute('class','node-label'+(!n.level?' root':n.level===1?' l1':''));text.setAttribute('fill',n.color);text.textContent=n.name;g.appendChild(circle);g.appendChild(text);if(n.hasChildren){const isC=collapsedState[n.key];const badge=document.createElementNS(ns,'circle');badge.setAttribute('cx',n.x+r+4);badge.setAttribute('cy',n.y-r-4);badge.setAttribute('r',7);badge.setAttribute('fill',isC?n.color:'rgba(255,255,255,0.12)');badge.setAttribute('stroke',n.color);badge.setAttribute('stroke-width','1.5');const bt=document.createElementNS(ns,'text');bt.setAttribute('x',n.x+r+4);bt.setAttribute('y',n.y-r-1);bt.setAttribute('text-anchor','middle');bt.setAttribute('fill',isC?'#fff':n.color);bt.setAttribute('class','toggle-badge');bt.textContent=isC?'+':'−';g.appendChild(badge);g.appendChild(bt);g.addEventListener('click',e=>{e.stopPropagation();collapsedState[n.key]=!collapsedState[n.key];renderMindmap()})}else if(n.route){g.addEventListener('click',()=>openModal(n.route))}svg.appendChild(g)})}
+function renderCards(){const grid=document.getElementById('route-grid');routes.forEach(r=>{grid.innerHTML+=`<div class="route-card" onclick="openModal('${r.id}')" style="border-color:${r.color}22;"><div class="card-header"><div class="dot" style="background:${r.color};box-shadow:0 0 8px ${r.color}88;"></div><h3 style="color:${r.color};">${r.name}</h3></div><div class="subtitle">${r.subtitle}</div><div class="summary">${r.summary}</div><span class="badge ${r.badge}">${r.badgeText}</span></div>`})}
+function openModal(id){const r=routes.find(x=>x.id===id);if(!r)return;document.getElementById('modal-title').textContent=r.name;document.getElementById('modal-title').style.color=r.color;document.getElementById('modal-sub').textContent=r.nameEn+' — '+r.subtitle;document.getElementById('modal-body').innerHTML=`<p>${r.detail}</p><p><strong>キーワード：</strong>${r.keywords.map(k=>`<span style="display:inline-block;background:${r.color}18;color:${r.color};padding:2px 10px;border-radius:10px;font-size:12px;margin:3px 4px;">${k}</span>`).join('')}</p>`;document.getElementById('modal').classList.add('active')}
+function closeModal(){document.getElementById('modal').classList.remove('active')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal()});
+function initParticles(){const canvas=document.getElementById('particle-canvas'),ctx=canvas.getContext('2d');let W,H;function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}resize();window.addEventListener('resize',resize);const colors=['#00d4ff','#7c3aed','#ff6b9d','#fbbf24','#60d4a0'];const particles=Array.from({length:45},()=>({x:Math.random()*W,y:Math.random()*H,size:1+Math.random()*2.5,speed:0.2+Math.random()*0.5,drift:(Math.random()-0.5)*0.3,opacity:0.08+Math.random()*0.22,color:colors[Math.floor(Math.random()*colors.length)],phase:Math.random()*Math.PI*2}));function draw(){ctx.clearRect(0,0,W,H);particles.forEach(p=>{ctx.save();ctx.globalAlpha=p.opacity;ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();ctx.restore();p.y-=p.speed;p.x+=p.drift+Math.sin(p.phase+=0.012)*0.25;if(p.y<-10){p.y=H+10;p.x=Math.random()*W}});requestAnimationFrame(draw)}draw()}
+renderMindmap();renderCards();initParticles();
+</script>
+</body>
+</html>
