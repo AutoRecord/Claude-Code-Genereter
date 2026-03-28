@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>サノバウィッチ - ルート分岐マインドマップ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg-primary: #0a0c18;
+            --bg-secondary: #12152a;
+            --bg-card: rgba(18, 21, 48, 0.85);
+            --accent-magic: #a78bfa;
+            --accent-moon: #c4b5fd;
+            --accent-star: #fbbf24;
+            --text-primary: #e0dff0;
+            --text-secondary: #9b98b8;
+            --nene: #f472b6;
+            --meguru: #fb923c;
+            --tsumugi: #60a5fa;
+            --wakana: #34d399;
+            --touko: #c084fc;
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden; min-height: 100vh;
+        }
+
+        /* ── Magic Particles ── */
+        #magic-canvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── Header ── */
+        .header {
+            position: relative; z-index: 2;
+            text-align: center; padding: 48px 20px 32px;
+            background: linear-gradient(180deg, rgba(20,15,50,0.8) 0%, transparent 100%);
+        }
+        .header h1 {
+            font-family: 'Noto Serif JP', serif;
+            font-size: clamp(28px, 5vw, 48px); font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-magic), var(--accent-star));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            letter-spacing: 0.1em;
+        }
+        .header .en-title {
+            font-size: 13px; color: var(--accent-moon); letter-spacing: 0.3em; margin-top: 4px;
+        }
+        .header p { color: var(--text-secondary); font-size: 14px; margin-top: 8px; letter-spacing: 0.15em; }
+        .header .tag {
+            display: inline-block; margin-top: 12px; padding: 4px 16px; border-radius: 20px;
+            background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3);
+            font-size: 12px; color: var(--accent-magic);
+        }
+
+        /* ── Container ── */
+        .container { position: relative; z-index: 2; max-width: 1200px; margin: 0 auto; padding: 0 20px 60px; }
+
+        /* ── Section Title ── */
+        .section-title {
+            font-family: 'Noto Serif JP', serif; font-size: 22px; font-weight: 700;
+            color: var(--accent-star); margin: 40px 0 20px; padding-left: 16px;
+            border-left: 3px solid var(--accent-star);
+        }
+
+        /* ── Overview ── */
+        .overview {
+            background: var(--bg-card); border: 1px solid rgba(167,139,250,0.2);
+            border-radius: 16px; padding: 28px; backdrop-filter: blur(12px);
+            margin-bottom: 32px; line-height: 1.8; font-size: 14px; color: var(--text-secondary);
+        }
+        .overview strong { color: var(--accent-magic); }
+
+        /* ── Mindmap SVG ── */
+        #mindmap-area {
+            width: 100%; overflow-x: auto; background: var(--bg-card);
+            border: 1px solid rgba(167,139,250,0.15); border-radius: 16px; padding: 20px;
+            backdrop-filter: blur(12px); margin-bottom: 40px;
+        }
+        #mindmap-svg { width: 100%; min-height: 460px; }
+        #mindmap-svg .link { fill: none; stroke-width: 2.5; opacity: 0.6; }
+        #mindmap-svg .node-circle { cursor: pointer; transition: r 0.2s; }
+        #mindmap-svg .node-circle:hover { filter: brightness(1.3); }
+        #mindmap-svg .node-label { cursor: pointer; font-size: 13px; font-family: 'Noto Sans JP', sans-serif; }
+        #mindmap-svg .node-label.root { font-size: 16px; font-weight: 700; }
+        #mindmap-svg .node-label.l1 { font-size: 14px; font-weight: 700; }
+
+        /* ── Route Cards ── */
+        .route-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+        .route-card {
+            background: var(--bg-card); border: 1px solid rgba(167,139,250,0.15);
+            border-radius: 16px; padding: 24px; backdrop-filter: blur(12px);
+            transition: transform 0.25s, box-shadow 0.25s; cursor: default;
+        }
+        .route-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+        .route-card .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+        .route-card .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .route-card h3 { font-family: 'Noto Serif JP', serif; font-size: 18px; font-weight: 700; }
+        .route-card .subtitle { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; padding-left: 24px; }
+        .route-card .summary { font-size: 13px; line-height: 1.8; color: var(--text-secondary); }
+        .route-card .summary strong { color: var(--text-primary); }
+        .route-card .badge {
+            display: inline-block; margin-top: 12px; padding: 3px 12px; border-radius: 12px; font-size: 11px;
+        }
+        .badge-main { background: rgba(244,114,182,0.15); color: var(--nene); border: 1px solid rgba(244,114,182,0.3); }
+        .badge-sub { background: rgba(52,211,153,0.15); color: var(--wakana); border: 1px solid rgba(52,211,153,0.3); }
+        .badge-true { background: rgba(244,114,182,0.2); color: #f9a8d4; border: 1px solid rgba(244,114,182,0.4); }
+        .badge-core { background: rgba(192,132,252,0.15); color: var(--touko); border: 1px solid rgba(192,132,252,0.3); }
+
+        /* ── Order ── */
+        .order-flow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+        .order-item {
+            padding: 8px 18px; border-radius: 24px; font-size: 13px; font-weight: 500;
+            border: 1px solid; white-space: nowrap;
+        }
+        .order-arrow { color: var(--text-secondary); font-size: 18px; }
+
+        /* ── Modal ── */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.65); z-index: 100; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: var(--bg-secondary); border: 1px solid rgba(167,139,250,0.3);
+            border-radius: 20px; padding: 32px; max-width: 560px; width: 90%;
+            max-height: 80vh; overflow-y: auto; animation: modalIn 0.3s ease;
+        }
+        @keyframes modalIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        .modal-content h2 { font-family: 'Noto Serif JP', serif; font-size: 22px; margin-bottom: 8px; }
+        .modal-content .modal-sub { font-size: 12px; color: var(--text-secondary); margin-bottom: 16px; }
+        .modal-content p { font-size: 14px; line-height: 1.9; color: var(--text-secondary); margin-bottom: 12px; }
+        .modal-content p strong { color: var(--text-primary); }
+        .modal-close {
+            display: block; margin: 16px auto 0; background: rgba(167,139,250,0.15);
+            border: 1px solid rgba(167,139,250,0.3); color: var(--accent-magic);
+            padding: 8px 32px; border-radius: 20px; cursor: pointer; font-size: 13px;
+        }
+        .modal-close:hover { background: rgba(167,139,250,0.25); }
+
+        .footer { text-align: center; padding: 32px; font-size: 11px; color: rgba(155,152,184,0.5); }
+    </style>
+</head>
+<body>
+
+<canvas id="magic-canvas"></canvas>
+
+<header class="header">
+    <h1>サノバウィッチ</h1>
+    <div class="en-title">SABBAT OF THE WITCH</div>
+    <p>ルート分岐 ＆ ストーリーマインドマップ</p>
+    <span class="tag">ゆずソフト — 2015</span>
+</header>
+
+<div class="container">
+    <div class="overview">
+        「<strong>他人の感情を五感で感じ取る</strong>」特異体質を持つ主人公・<strong>保科柊史</strong>が、
+        魔女の秘密を抱えるヒロイン・綾地寧々と出会い、<strong>オカルト研究部</strong>を舞台に
+        「魔女」「願い」「代償」をめぐる恋愛アドベンチャー。
+        願いには必ず<strong>代償</strong>が伴い、各ヒロインが抱える秘密と向き合うことで物語が深まる。
+    </div>
+
+    <h2 class="section-title">ルート分岐マップ</h2>
+    <div id="mindmap-area">
+        <svg id="mindmap-svg" viewBox="0 0 1100 460"></svg>
+    </div>
+
+    <h2 class="section-title">推奨攻略順</h2>
+    <div class="overview">
+        <div class="order-flow">
+            <span class="order-item" style="color:var(--meguru);border-color:var(--meguru);">① 因幡めぐる</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--wakana);border-color:var(--wakana);">② 仮屋和奏</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--touko);border-color:var(--touko);">③ 戸隠憧子</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--tsumugi);border-color:var(--tsumugi);">④ 椎葉紬</span>
+            <span class="order-arrow">→</span>
+            <span class="order-item" style="color:var(--nene);border-color:var(--nene);">⑤ 綾地寧々</span>
+        </div>
+        <p style="margin-top:14px;font-size:12px;">
+            ※ 寧々ルートは物語の核心＋タイムリープに関わるため最後推奨。寧々ノーマルEND後にRESTARTでトゥルーENDが解禁。
+        </p>
+    </div>
+
+    <h2 class="section-title">各ルート要約</h2>
+    <div class="route-grid" id="route-grid"></div>
+</div>
+
+<div class="modal-overlay" id="modal">
+    <div class="modal-content">
+        <h2 id="modal-title"></h2>
+        <div class="modal-sub" id="modal-sub"></div>
+        <div id="modal-body"></div>
+        <button class="modal-close" onclick="closeModal()">閉じる</button>
+    </div>
+</div>
+
+<footer class="footer">サノバウィッチ ルート分岐マインドマップ — Fan-made reference</footer>
+
+<script>
+const routes = [
+    {
+        id:'nene', name:'綾地寧々', nameEn:'Nene Ayachi',
+        color:'#f472b6', badge:'badge-true', badgeText:'メイン / トゥルーエンド',
+        subtitle:'才色兼備の魔女 — 秘密の共有者',
+        summary:'魔女の代償として<strong>「発情してしまう」</strong>秘密を抱える才色兼備のヒロイン。柊史に秘密を知られたことで二人の関係が始まる。<strong>タイムリープ</strong>が絡む切ない展開の末、RESTARTからトゥルーENDへ。',
+        detail:'寧々の願いは「両親の離婚をなかったことにしたい」。その代償として自分の意志に関係なく発情してしまう体質になった。物語の核心に迫るルートで、時間跳躍により柊史との記憶が失われるBAD ENDを一度経験した後、タイトル画面の「RESTART」から真のエンディングへ繋がる。本作の集大成。',
+        keywords:['魔女の代償','タイムリープ','RESTART','トゥルーEND','両親の離婚']
+    },
+    {
+        id:'meguru', name:'因幡めぐる', nameEn:'Meguru Inaba',
+        color:'#fb923c', badge:'badge-main', badgeText:'メインヒロイン',
+        subtitle:'社交的に見えて実は孤独な少女',
+        summary:'一見派手で社交的だが<strong>実は一人が好き</strong>な少女。親友・<strong>木月千穂子</strong>が病弱なめぐるを治すために魔女になり、その代償として<strong>記憶を失っていく</strong>悲劇が明かされる。',
+        detail:'めぐるのトラウマは過去の友人関係にある。千穂子がめぐるの病気を治す願いを叶えた代償として徐々に記憶を失っていく展開は、本作屈指の泣きポイント。ギャグと甘い恋愛模様、そしてシリアスのバランスが高く評価されている。素直になれない二人の歯痒い関係性も見どころ。',
+        keywords:['孤独','親友の犠牲','記憶喪失','トラウマ','ギャグとシリアス']
+    },
+    {
+        id:'tsumugi', name:'椎葉紬', nameEn:'Tsumugi Shiiba',
+        color:'#60a5fa', badge:'badge-main', badgeText:'メインヒロイン',
+        subtitle:'男装の転校生 — 魔力の前借り',
+        summary:'男装女子のような見た目の転校生。<strong>魔力の前借り</strong>をしてしまったことで苦しむ。契約者アルプ<strong>「アカギ」</strong>との関係も物語の軸。代償は<strong>女性らしい服装で体調を崩す</strong>こと。',
+        detail:'紬の願いのために魔力を前借りした結果、女性らしい服装をすると体調を崩すという代償を背負う。アルプのアカギとのやり取りが物語の魅力を深め、柊史が代償の一部を肩代わりすることで解決を目指す。感動的なエピローグが高く評価されている。',
+        keywords:['男装','アルプ・アカギ','魔力の前借り','代償の肩代わり','感動']
+    },
+    {
+        id:'wakana', name:'仮屋和奏', nameEn:'Wakana Kariya',
+        color:'#34d399', badge:'badge-sub', badgeText:'サブヒロイン',
+        subtitle:'幼馴染 — バンド活動に打ち込む少女',
+        summary:'柊史の<strong>幼馴染</strong>でバンド活動に打ち込む活発な少女。他ルートに比べて<strong>王道学園モノ</strong>の雰囲気が強く、幼馴染ならではの距離感と甘酸っぱい恋愛が描かれる。',
+        detail:'サブヒロイン枠ながら専用ムービーも用意されており満足度が高い。魔女要素は控えめで、バンド活動や日常のイベントを通じて少しずつ関係を深めていく。幼馴染特有の「今さら好きと言えない」歯痒さと、それを乗り越えた先の甘い展開が見どころ。',
+        keywords:['幼馴染','バンド活動','王道学園モノ','甘酸っぱい','専用ムービー']
+    },
+    {
+        id:'touko', name:'戸隠憧子', nameEn:'Touko Togakushi',
+        color:'#c084fc', badge:'badge-core', badgeText:'物語の深層',
+        subtitle:'学生会長 — 柊史の力が効かない唯一の存在',
+        summary:'生徒の憧れの的である<strong>学生会長</strong>。柊史の感情感知が<strong>唯一効かない</strong>存在。その正体は、かつて<strong>柊史の母親と契約していたアルプ</strong>が人間になった姿。',
+        detail:'憧子は人間ではなくアルプであり、柊史の母親との契約を通じて人間として生きることになった存在。柊史の能力が効かない理由もここに起因する。記憶喪失などの重い展開を乗り越え、深層世界で互いの気持ちをぶつけ合う熱い結末が特徴。物語の深い部分に触れるルート。',
+        keywords:['アルプの正体','学生会長','深層世界','記憶喪失','母親の過去']
+    }
+];
+
+// ── Mindmap Tree ──
+const tree = {
+    name:'サノバウィッチ', color:'#fbbf24',
+    children:[{
+        name:'共通ルート', color:'#a78bfa', info:'秘密の共有・オカルト研究部',
+        children:[
+            { name:'綾地寧々', color:'#f472b6', route:'nene',
+              children:[{name:'魔女の代償',color:'#f472b6'},{name:'タイムリープ',color:'#f472b6'},{name:'RESTART→トゥルーEND',color:'#f472b6'}]
+            },
+            { name:'因幡めぐる', color:'#fb923c', route:'meguru',
+              children:[{name:'親友の犠牲',color:'#fb923c'},{name:'記憶の消失',color:'#fb923c'}]
+            },
+            { name:'椎葉紬', color:'#60a5fa', route:'tsumugi',
+              children:[{name:'魔力の前借り',color:'#60a5fa'},{name:'アルプ・アカギ',color:'#60a5fa'},{name:'代償の肩代わり',color:'#60a5fa'}]
+            },
+            { name:'仮屋和奏', color:'#34d399', route:'wakana',
+              children:[{name:'幼馴染の恋',color:'#34d399'},{name:'バンド活動',color:'#34d399'}]
+            },
+            { name:'戸隠憧子', color:'#c084fc', route:'touko',
+              children:[{name:'アルプの正体',color:'#c084fc'},{name:'深層世界',color:'#c084fc'},{name:'母親との契約',color:'#c084fc'}]
+            }
+        ]
+    }]
+};
+
+function renderMindmap(){
+    const svg=document.getElementById('mindmap-svg'), ns='http://www.w3.org/2000/svg';
+    svg.innerHTML='';
+    const root={x:70,y:230,name:tree.name,color:tree.color};
+    const common={x:280,y:230,name:'共通ルート',color:'#a78bfa'};
+    const heroines=tree.children[0].children;
+    const hYStart=50, hYStep=85;
+    const nodes=[root,common], links=[{from:root,to:common,color:'#a78bfa'}];
+
+    heroines.forEach((h,i)=>{
+        const hy=hYStart+i*hYStep;
+        const hNode={x:520,y:hy,name:h.name,color:h.color,route:h.route,level:1};
+        nodes.push(hNode); links.push({from:common,to:hNode,color:h.color});
+        if(h.children) h.children.forEach((c,j)=>{
+            const cy=hy-((h.children.length-1)*24)/2+j*24;
+            const cNode={x:800,y:cy,name:c.name,color:c.color,level:2};
+            nodes.push(cNode); links.push({from:hNode,to:cNode,color:c.color});
+        });
+    });
+
+    links.forEach(l=>{
+        const path=document.createElementNS(ns,'path');
+        const mx=(l.from.x+l.to.x)/2;
+        path.setAttribute('d',`M${l.from.x},${l.from.y} C${mx},${l.from.y} ${mx},${l.to.y} ${l.to.x},${l.to.y}`);
+        path.setAttribute('class','link'); path.setAttribute('stroke',l.color);
+        svg.appendChild(path);
+    });
+    nodes.forEach(n=>{
+        const g=document.createElementNS(ns,'g');
+        const circle=document.createElementNS(ns,'circle');
+        circle.setAttribute('cx',n.x); circle.setAttribute('cy',n.y);
+        circle.setAttribute('r',n.level===2?4:n.level===1?7:10);
+        circle.setAttribute('fill',n.color); circle.setAttribute('class','node-circle');
+        const text=document.createElementNS(ns,'text');
+        text.setAttribute('x',n.x+(n.level===2?10:16)); text.setAttribute('y',n.y+4);
+        text.setAttribute('class','node-label'+(n.level===undefined?' root':n.level===1?' l1':''));
+        text.setAttribute('fill',n.color); text.textContent=n.name;
+        if(n.route){g.style.cursor='pointer'; g.addEventListener('click',()=>openModal(n.route));}
+        g.appendChild(circle); g.appendChild(text); svg.appendChild(g);
+    });
+}
+
+function renderCards(){
+    const grid=document.getElementById('route-grid');
+    routes.forEach(r=>{
+        grid.innerHTML+=`
+        <div class="route-card" onclick="openModal('${r.id}')" style="border-color:${r.color}22;">
+            <div class="card-header">
+                <div class="dot" style="background:${r.color};box-shadow:0 0 8px ${r.color}88;"></div>
+                <h3 style="color:${r.color};">${r.name}</h3>
+            </div>
+            <div class="subtitle">${r.subtitle}</div>
+            <div class="summary">${r.summary}</div>
+            <span class="badge ${r.badge}">${r.badgeText}</span>
+        </div>`;
+    });
+}
+
+function openModal(id){
+    const r=routes.find(x=>x.id===id); if(!r) return;
+    document.getElementById('modal-title').textContent=r.name;
+    document.getElementById('modal-title').style.color=r.color;
+    document.getElementById('modal-sub').textContent=r.nameEn+' — '+r.subtitle;
+    document.getElementById('modal-body').innerHTML=`<p>${r.detail}</p><p><strong>キーワード：</strong>${r.keywords.map(k=>`<span style="display:inline-block;background:${r.color}18;color:${r.color};padding:2px 10px;border-radius:10px;font-size:12px;margin:3px 4px;">${k}</span>`).join('')}</p>`;
+    document.getElementById('modal').classList.add('active');
+}
+function closeModal(){document.getElementById('modal').classList.remove('active');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// ── Magic Particles ──
+function initMagic(){
+    const canvas=document.getElementById('magic-canvas'), ctx=canvas.getContext('2d');
+    let W,H;
+    function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+    resize(); window.addEventListener('resize',resize);
+    const colors=['#a78bfa','#c4b5fd','#f472b6','#fbbf24','#60a5fa'];
+    const particles=Array.from({length:50},()=>({
+        x:Math.random()*W, y:Math.random()*H,
+        size:1+Math.random()*3, speed:0.15+Math.random()*0.4,
+        drift:Math.random()*0.3-0.15, opacity:0.1+Math.random()*0.35,
+        color:colors[Math.floor(Math.random()*colors.length)],
+        phase:Math.random()*Math.PI*2
+    }));
+    function draw(){
+        ctx.clearRect(0,0,W,H);
+        particles.forEach(p=>{
+            ctx.save(); ctx.globalAlpha=p.opacity;
+            ctx.fillStyle=p.color; ctx.shadowColor=p.color; ctx.shadowBlur=8;
+            ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
+            ctx.restore();
+            p.y-=p.speed; p.x+=p.drift+Math.sin(p.phase+=0.01)*0.2;
+            if(p.y<-10){p.y=H+10;p.x=Math.random()*W;}
+        });
+        requestAnimationFrame(draw);
+    }
+    draw();
+}
+
+renderMindmap(); renderCards(); initMagic();
+</script>
+</body>
+</html>
