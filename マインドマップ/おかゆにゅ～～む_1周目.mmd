@@ -1,0 +1,221 @@
+%% おかゆにゅ～～む！R 1周目 フローチャート
+graph TD
+    classDef title fill:#f5c2e7,stroke:#cba6f7,stroke-width:3px,color:#11111b,font-weight:bold,font-size:16px
+    classDef section fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    classDef choice fill:#313244,stroke:#cba6f7,stroke-width:1px,color:#f5c2e7,stroke-dasharray: 3 3
+    classDef point fill:#a6e3a1,stroke:#40a02b,stroke-width:1px,color:#11111b
+
+    Start(((1周目 開始))):::title --> Event1
+
+    %% ----- イベント1 -----
+    subgraph S1 [にゃふにゃふタイム 第1フェーズ]
+        Event1(アイテム選択):::section
+        Event1 -->|2pt| Item1A[布団]:::point
+        Event1 -->|1pt| Item1B[シャツ]:::point
+        Event1 -->|0pt| Item1C[野球拳]
+
+        Touch1(タッチ選択):::section
+        Item1A --> Touch1
+        Item1B --> Touch1
+        Item1C --> Touch1
+
+        Touch1 -->|2pt| T1A[おでこ]:::point
+        Touch1 -->|1pt| T1B[にのうで]:::point
+
+        Plan1(プラン選択):::section
+        T1A --> Plan1
+        T1B --> Plan1
+
+        Plan1 --> P1A[紅葉狩り]:::choice
+        Plan1 --> P1B[リンゴ狩り]
+        
+        P1A -->|3pt| P1A_1[きのこ]:::point
+        P1A --> P1A_2[どんぐり]
+    end
+
+    P1B --> Event2
+    P1A_1 --> Event2
+    P1A_2 --> Event2
+
+    %% ----- イベント2 -----
+    subgraph S2 [クイズ＆探索]
+        Event2{Q: 行き先}:::choice
+        Event2 --> Q1[酸ヶ湯]
+        Event2 --> Q2[青森市]
+        Event2 --> Q3[八戸市]
+        
+        Item2(アイテム選択):::section
+        Q1 --> Item2
+        Q2 --> Item2
+        Q3 --> Item2
+        
+        Item2 -->|2pt| I2A[たまご味噌]:::point
+        
+        Touch2(タッチ選択):::section
+        I2A --> Touch2
+        
+        Touch2 -->|4pt| T2A[みみ]:::point
+        Touch2 -->|2pt| T2B[ふともも]:::point
+    end
+    
+    T2A --> Event3
+    T2B --> Event3
+    
+    %% ----- イベント3 -----
+    subgraph S3 [ASMR こもりうた]
+        Event3(プラン選択):::section
+        Event3 --> P3A[津軽鉄道]:::choice
+        Event3 --> P3B[市場]
+        
+        P3A -->|3pt| P3A_1[車内に留まる]:::point
+        P3A -->|3pt| P3A_2[社外に出る]:::point
+    end
+
+    P3B --> Event4
+    P3A_1 --> Event4
+    P3A_2 --> Event4
+    
+    %% ----- イベント4 -----
+    subgraph S4 [にゃふにゃふ 中盤]
+        Event4(アイテム選択):::section
+        Event4 -->|4pt| I4[ぬいぐるみ]:::point
+        
+        Act4(スキンシップ):::section
+        I4 --> Act4
+        Act4 -->|5pt| A4_1[抱き寄せる]:::point
+        Act4 -->|3pt| A4_2[飲み物差し入れ]:::point
+        
+        Touch4(タッチ選択):::section
+        A4_1 --> Touch4
+        A4_2 --> Touch4
+        
+        Touch4 -->|5pt| T4A[あご]:::point
+        Touch4 -->|3pt| T4B[手]:::point
+    end
+    
+    T4A --> Event5
+    T4B --> Event5
+    
+    %% ----- イベント5 -----
+    subgraph S5 [おかゆをなでなでしよう]
+        Event5(おみくじ):::section
+        Event5 -->|2pt| O5_1[左のおみくじ]:::point
+        Event5 -->|1pt| O5_2[右のおみくじ]:::point
+        
+        Touch5(タッチ選択):::section
+        O5_1 --> Touch5
+        O5_2 --> Touch5
+        
+        Touch5 -->|2pt| T5A[はな]:::point
+        Touch5 -->|1pt| T5B[おなか]:::point
+        
+        Plan5(プラン選択):::section
+        T5A --> Plan5
+        T5B --> Plan5
+        
+        Plan5 --> P5A[氷爆ツアー]:::choice
+        Plan5 --> P5B[水族館]
+        
+        P5A -->|3pt| P5A_1[五目並べ]:::point
+        P5A -->|3pt| P5A_2[テレビゲーム]:::point
+    end
+    
+    P5B --> Event6
+    P5A_1 --> Event6
+    P5A_2 --> Event6
+    
+    %% ----- イベント6 -----
+    subgraph S6 [にゃふにゃふ 後半1]
+        Event6(アイテム選択):::section
+        Event6 -->|2pt| I6A[手振り鉦]:::point
+        Event6 -->|1pt| I6B[ねぶた絵]:::point
+        
+        Touch6(タッチ選択):::section
+        I6A --> Touch6
+        I6B --> Touch6
+        
+        Touch6 -->|2pt| T6A[頭]:::point
+        Touch6 -->|1pt| T6B[尻尾]:::point
+        
+        Plan6(プラン選択):::section
+        T6A --> Plan6
+        T6B --> Plan6
+        
+        Plan6 --> P6A[八甲田山の樹氷]:::choice
+        Plan6 --> P6B[ウィンタースポーツ]
+        
+        P6A -->|3pt| P6A_1[樹氷を見に行く]:::point
+        P6A -->|3pt| P6A_2[一休み]:::point
+    end
+    
+    P6B --> Event7
+    P6A_1 --> Event7
+    P6A_2 --> Event7
+    
+    %% ----- イベント7 -----
+    subgraph S7 [撮影タイム＆スキンシップ]
+        Event7(アイテム選択):::section
+        Event7 -->|4pt| I7A[バレンタイン]:::point
+        Event7 -->|0pt| I7B[おにぎり]
+        
+        Touch7(タッチ選択):::section
+        I7A --> Touch7
+        I7B --> Touch7
+        
+        Touch7 -->|4pt| T7A[おなか]:::point
+        Touch7 -->|0pt| T7B[頬]
+        
+        Pose7(ポーズ＆撮影):::section
+        T7A --> Pose7
+        T7B --> Pose7
+        Pose7 --> PoseA[ピース: 顔]
+        Pose7 --> PoseB[ネコ: 尻尾]
+        Pose7 --> PoseC[ハート: 胸]
+        
+        Item7_2(アイテム選択2):::section
+        PoseA --> Item7_2
+        PoseB --> Item7_2
+        PoseC --> Item7_2
+        Item7_2 -->|3pt| I7C[お布団]:::point
+        Item7_2 -->|2pt| I7D[妹モノの本]:::point
+        
+        Touch7_2(タッチ選択2):::section
+        I7C --> Touch7_2
+        I7D --> Touch7_2
+        Touch7_2 -->|3pt| T7C[ふともも]:::point
+        Touch7_2 -->|2pt| T7D[鎖骨]:::point
+        
+        Item7_3(アイテム選択3):::section
+        T7C --> Item7_3
+        T7D --> Item7_3
+        Item7_3 -->|6pt| I7E[製菓キット]:::point
+        Item7_3 -->|3pt| I7F[チョコの箱]:::point
+        
+        Touch7_3(タッチ選択3):::section
+        I7E --> Touch7_3
+        I7F --> Touch7_3
+        Touch7_3 -->|6pt| T7E[あご]:::point
+        Touch7_3 -->|3pt| T7F[肩]:::point
+    end
+    
+    T7E --> Event8
+    T7F --> Event8
+    
+    %% ----- イベント8 -----
+    subgraph S8 [クライマックス]
+        Event8{Q: お風呂・味}:::choice
+        Event8 --> Q8A[抹茶]
+        Event8 --> Q8B[チョコ]
+        Event8 --> Q8C[バニラ]
+        
+        Awa(泡取り除き):::section
+        Q8A --> Awa
+        Q8B --> Awa
+        Q8C --> Awa
+        
+        Awa --> EndAct1[腹]:::point
+        Awa --> EndAct2[ペロ]:::point
+    end
+
+    EndAct1 --> End(((1周目 完了))):::title
+    EndAct2 --> End

@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>フローチャート・エディタ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f111a;
+            --bg-surface: #1a1c29;
+            --bg-toolbar: #131520;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #a78bfa;
+            --accent-hover: #c4b5fd;
+            --border: #2dd4bf;
+            --btn-bg: #4f46e5;
+            --btn-hover: #6366f1;
+            --btn-active: #4338ca;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-main);
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Toolbar Styling */
+        #toolbar {
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: var(--bg-toolbar);
+            border-bottom: 1px solid rgba(167, 139, 250, 0.2);
+            gap: 12px;
+            flex-shrink: 0;
+            height: 48px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .title-brand {
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--accent);
+            letter-spacing: 0.05em;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .title-brand::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: var(--border);
+            border-radius: 2px;
+            transform: rotate(45deg);
+        }
+
+        #toolbar button {
+            background: rgba(79, 70, 229, 0.15);
+            color: var(--accent-hover);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            padding: 6px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        #toolbar button:hover {
+            background: rgba(79, 70, 229, 0.3);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        #toolbar button:active {
+            transform: translateY(1px);
+        }
+
+        .zoom-controls {
+            display: flex;
+            gap: 4px;
+            margin-left: 20px;
+            border-left: 1px solid rgba(255,255,255,0.1);
+            padding-left: 20px;
+        }
+
+        .zoom-controls button {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .zoom-controls button:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-main);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        #filename {
+            color: var(--text-muted);
+            font-size: 13px;
+            margin-left: auto;
+            user-select: none;
+            background: rgba(0,0,0,0.3);
+            padding: 4px 12px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* Workspace Layout */
+        #workspace {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        #editor-pane {
+            width: 40%;
+            height: 100%;
+            border-right: 1px solid rgba(167, 139, 250, 0.1);
+            position: relative;
+        }
+
+        #preview-pane {
+            width: 60%;
+            height: 100%;
+            background: var(--bg-surface);
+            position: relative;
+            overflow: hidden;
+            background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        /* Rendered SVG Styles */
+        #preview-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #preview-container svg {
+            max-width: 100%;
+            max-height: 100%;
+            transition: opacity 0.3s;
+        }
+
+        /* Error overlay */
+        #error-overlay {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 100;
+            white-space: pre-wrap;
+            border-left: 4px solid #f87171;
+        }
+
+        /* Loading */
+        #loading {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-base);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 16px;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(167, 139, 250, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div>エディタを読み込み中...</div>
+    </div>
+
+    <div id="app">
+        <div id="toolbar">
+            <div class="title-brand">FLOW EDITOR</div>
+            <button id="btn-open" title="Mermaidファイルを開く (Ctrl+O)">開く</button>
+            <button id="btn-save" title="上書き保存 (Ctrl+S)">保存</button>
+            <button id="btn-save-as" title="名前を付けて保存 (Ctrl+Shift+S)">名前を付けて保存</button>
+            
+            <div class="zoom-controls">
+                <button id="btn-zoom-in" title="拡大">+</button>
+                <button id="btn-zoom-out" title="縮小">−</button>
+                <button id="btn-zoom-reset" title="リセット">◎</button>
+            </div>
+
+            <span id="filename">Untitled.mmd</span>
+        </div>
+        <div id="workspace">
+            <div id="editor-pane"></div>
+            <div id="preview-pane">
+                <div id="preview-container"></div>
+                <div id="error-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CDN Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10.8.0/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/svg-pan-zoom@3.6.1/dist/svg-pan-zoom.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.min.js"></script>
+
+    <script>
+    (function () {
+        'use strict';
+
+        // ---- State ----
+        var editor = null;
+        var panZoomInstance = null;
+        var currentFileHandle = null;
+        var isDirty = false;
+        var debounceTimer = null;
+        var renderCount = 0;
+
+        // ---- Default Content: 4 Routes converging to True Route ----
+        var DEFAULT_MERMAID = `%% ルート合流・収束フローチャート
+%% 複数が1つに繋がる「DAG（有向非巡回グラフ）」の表現
+
+graph TD
+    classDef common fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4
+    classDef heroine fill:#313244,stroke:#cba6f7,stroke-width:2px,color:#f5c2e7
+    classDef trueRoute fill:#45475a,stroke:#f38ba8,stroke-width:3px,color:#f38ba8
+    classDef goodEnd fill:#a6e3a1,stroke:#40a02b,stroke-width:2px,color:#11111b
+    classDef normEnd fill:#f9e2af,stroke:#df8e1d,stroke-width:2px,color:#11111b
+
+    %% 共通パート
+    Start((ゲーム開始)):::common --> Common1[共通ルート 第1章]:::common
+    Common1 --> Common2[共通ルート 第2章]:::common
+    
+    %% 分岐ポイント
+    Common2 -- "選択肢" --> Split{個別ルート分岐}:::common
+    
+    %% 個別ルート（4方向への分岐）
+    Split -- "Aを選ぶ" --> RouteA[ヒロインA ルート]:::heroine
+    Split -- "Bを選ぶ" --> RouteB[ヒロインB ルート]:::heroine
+    Split -- "Cを選ぶ" --> RouteC[ヒロインC ルート]:::heroine
+    Split -- "Dを選ぶ" --> RouteD[ヒロインD ルート]:::heroine
+
+    %% エンディングへの分岐（それぞれの個別ノーマルエンド）
+    RouteA -- "好感度不足" --> END_A[A: ノーマルEND]:::normEnd
+    RouteB -- "好感度不足" --> END_B[B: ノーマルEND]:::normEnd
+    RouteC -- "好感度不足" --> END_C[C: ノーマルEND]:::normEnd
+    RouteD -- "好感度不足" --> END_D[D: ノーマルEND]:::normEnd
+
+    %% 大事なポイント：4つのルートが1つの『トゥルー』条件に合流する！
+    RouteA -- "条件クリア" --> UnlockPoint((4ルートクリア判定))
+    RouteB -- "条件クリア" --> UnlockPoint
+    RouteC -- "条件クリア" --> UnlockPoint
+    RouteD -- "条件クリア" --> UnlockPoint
+
+    %% 収束した後の展開
+    UnlockPoint -- "全てクリアで解放" --> TrueStart[グランドルート開始]:::trueRoute
+    TrueStart --> TrueMid[世界の真実編]:::trueRoute
+    TrueMid --> TrueEnd(((トゥルーエンド))):::goodEnd
+`;
+
+        // ---- File Picker API ----
+        var FILE_PICKER_OPTIONS = {
+            types: [{
+                description: 'Mermaid Files',
+                accept: { 
+                    'text/plain': ['.mmd', '.txt', '.mermaid'],
+                    'text/markdown': ['.md'] 
+                }
+            }],
+            excludeAcceptAllOption: false
+        };
+
+        // ---- Setup Mermaid ----
+        function setupMermaid() {
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: 'dark', // built-in dark theme base
+                fontFamily: "'Noto Sans JP', sans-serif",
+                securityLevel: 'loose',
+                flowchart: {
+                    htmlLabels: true,
+                    curve: 'basis' // Smooth curves ('basis', 'linear', 'stepAfter')
+                },
+                themeVariables: {
+                    primaryColor: '#1a1c29',
+                    primaryTextColor: '#e2e8f0',
+                    primaryBorderColor: '#6366f1',
+                    lineColor: '#94a3b8',
+                    secondaryColor: '#2d334a',
+                    tertiaryColor: '#131520'
+                }
+            });
+        }
+
+        // ---- Render Workflow ----
+        async function renderFlowchart(code) {
+            const container = document.getElementById('preview-container');
+            const errorOverlay = document.getElementById('error-overlay');
+            
+            if (!code || !code.trim()) {
+                container.innerHTML = '';
+                if (panZoomInstance) {
+                    panZoomInstance.destroy();
+                    panZoomInstance = null;
+                }
+                errorOverlay.style.display = 'none';
+                return;
+            }
+
+            try {
+                // Generate a unique ID for this render pass
+                renderCount++;
+                const id = 'mermaid-svg-' + renderCount;
+                
+                // Parse and render SVG
+                const { svg } = await mermaid.render(id, code);
+                
+                // Success: hide old error
+                errorOverlay.style.display = 'none';
+
+                // Cleanup existing pan/zoom
+                if (panZoomInstance) {
+                    panZoomInstance.destroy();
+                    panZoomInstance = null;
+                }
+
+                // Inject SVG
+                container.innerHTML = svg;
+                const svgElement = container.querySelector('svg');
+                
+                // Make SVG scalable for the pan-zoom library
+                svgElement.setAttribute('width', '100%');
+                svgElement.setAttribute('height', '100%');
+                // Remove fixed max-width injected by Mermaid to allow free zooming
+                svgElement.style.maxWidth = '100%';
+
+                // Initialize pan/zoom
+                panZoomInstance = svgPanZoom(svgElement, {
+                    zoomEnabled: true,
+                    controlIconsEnabled: false,
+                    fit: true,
+                    center: true,
+                    minZoom: 0.1,
+                    maxZoom: 10,
+                    zoomScaleSensitivity: 0.2
+                });
+
+            } catch (err) {
+                // Syntax error handling
+                console.warn('Mermaid parse error:', err);
+                errorOverlay.textContent = err.message || err.str || '構文エラーが発生しました。';
+                errorOverlay.style.display = 'block';
+                // Do not destroy the previous valid SVG so the user doesn't lose context while typing
+                // But we must remove the mermaid generated error SVG from the DOM to avoid duplication bugs
+                const errorSvg = document.getElementById('mermaid-svg-' + renderCount);
+                if(errorSvg) {
+                    errorSvg.remove();
+                }
+            }
+        }
+
+        function debouncedRender() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(function () {
+                renderFlowchart(editor.getValue());
+            }, 600); // 600ms debounce for smoother typing
+        }
+
+        // ---- File Handling ----
+        function supportsFileSystemAccess() {
+            return 'showOpenFilePicker' in window && 'showSaveFilePicker' in window;
+        }
+
+        function getFileName() {
+            return currentFileHandle ? currentFileHandle.name : 'Untitled.mmd';
+        }
+
+        function updateTitle() {
+            var name = getFileName();
+            var dirtyMark = isDirty ? ' *' : '';
+            document.getElementById('filename').textContent = name + dirtyMark;
+            document.title = name + dirtyMark + ' - フローチャート・エディタ';
+        }
+
+        async function openFile() {
+            if (isDirty && !confirm('未保存の変更があります。続行しますか？')) return;
+
+            if (supportsFileSystemAccess()) {
+                try {
+                    var handles = await window.showOpenFilePicker(FILE_PICKER_OPTIONS);
+                    currentFileHandle = handles[0];
+                    var file = await currentFileHandle.getFile();
+                    var text = await file.text();
+                    editor.setValue(text);
+                    isDirty = false;
+                    updateTitle();
+                } catch (err) {
+                    if (err.name !== 'AbortError') alert('開けませんでした: ' + err.message);
+                }
+            } else {
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.mmd,.txt,.md';
+                input.onchange = function () {
+                    var file = input.files[0];
+                    if (!file) return;
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        currentFileHandle = null;
+                        editor.setValue(reader.result);
+                        isDirty = false;
+                        document.getElementById('filename').textContent = file.name;
+                        document.title = file.name + ' - フローチャート・エディタ';
+                    };
+                    reader.readAsText(file);
+                };
+                input.click();
+            }
+        }
+
+        async function saveFile() {
+            if (supportsFileSystemAccess() && currentFileHandle) {
+                try {
+                    var writable = await currentFileHandle.createWritable();
+                    await writable.write(editor.getValue());
+                    await writable.close();
+                    isDirty = false;
+                    updateTitle();
+                } catch (err) {
+                    alert('保存に失敗しました: ' + err.message);
+                }
+            } else {
+                await saveFileAs();
+            }
+        }
+
+        async function saveFileAs() {
+            if (supportsFileSystemAccess()) {
+                try {
+                    currentFileHandle = await window.showSaveFilePicker({
+                        suggestedName: getFileName(),
+                        types: FILE_PICKER_OPTIONS.types
+                    });
+                    var writable = await currentFileHandle.createWritable();
+                    await writable.write(editor.getValue());
+                    await writable.close();
+                    isDirty = false;
+                    updateTitle();
+                } catch (err) {
+                    if (err.name !== 'AbortError') alert('保存できませんでした: ' + err.message);
+                }
+            } else {
+                var blob = new Blob([editor.getValue()], { type: 'text/plain' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = getFileName();
+                a.click();
+                URL.revokeObjectURL(url);
+                isDirty = false;
+                updateTitle();
+            }
+        }
+
+        // ---- UI Events ----
+        function bindEvents() {
+            document.getElementById('btn-open').onclick = openFile;
+            document.getElementById('btn-save').onclick = saveFile;
+            document.getElementById('btn-save-as').onclick = saveFileAs;
+
+            document.getElementById('btn-zoom-in').onclick = function() {
+                if(panZoomInstance) panZoomInstance.zoomIn();
+            };
+            document.getElementById('btn-zoom-out').onclick = function() {
+                if(panZoomInstance) panZoomInstance.zoomOut();
+            };
+            document.getElementById('btn-zoom-reset').onclick = function() {
+                if(panZoomInstance) {
+                    panZoomInstance.resetZoom();
+                    panZoomInstance.center();
+                }
+            };
+
+            // Keyboard Shortcuts
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyO, openFile);
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, saveFile);
+            editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyS, saveFileAs);
+
+            document.addEventListener('keydown', function (e) {
+                if (e.ctrlKey || e.metaKey) {
+                    if (e.key === 'o' || e.key === 'O') { e.preventDefault(); openFile(); }
+                    else if (e.shiftKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); saveFileAs(); }
+                    else if (e.key === 's' || e.key === 'S') { e.preventDefault(); saveFile(); }
+                }
+            });
+
+            window.addEventListener('resize', function () {
+                if (panZoomInstance) {
+                    panZoomInstance.resize();
+                    panZoomInstance.fit();
+                    panZoomInstance.center();
+                }
+            });
+
+            window.addEventListener('beforeunload', function (e) {
+                if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+            });
+        }
+
+        // ---- Initialization ----
+        function init() {
+            setupMermaid();
+
+            require.config({ paths: { 'vs': 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs' }});
+            require(['vs/editor/editor.main'], function () {
+                
+                // Start with a basic pseudo-language for mermaid highlighting
+                monaco.languages.register({ id: 'mermaid' });
+                monaco.languages.setMonarchTokensProvider('mermaid', {
+                    tokenizer: {
+                        root: [
+                            [/(graph|flowchart|sequenceDiagram|classDiagram|stateDiagram|gantt|pie|journey)\b/, 'keyword'],
+                            [/-->|--|==>|-.->/, 'operator'],
+                            [/".*?"/, 'string'],
+                            [/[{}()\[\]]/, 'delimiter'],
+                            [/%%.*/, 'comment']
+                        ]
+                    }
+                });
+
+                editor = monaco.editor.create(document.getElementById('editor-pane'), {
+                    value: DEFAULT_MERMAID,
+                    language: 'mermaid',
+                    theme: 'vs-dark',
+                    minimap: { enabled: false },
+                    wordWrap: 'on',
+                    fontSize: 14,
+                    lineHeight: 24,
+                    padding: { top: 16 },
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    fontFamily: "'Cascadia Code', Consolas, monospace"
+                });
+
+                // Set initial state
+                renderFlowchart(editor.getValue());
+
+                // Auto-sync
+                editor.onDidChangeModelContent(function () {
+                    isDirty = true;
+                    updateTitle();
+                    debouncedRender();
+                });
+
+                bindEvents();
+                setTimeout(() => {
+                    document.getElementById('loading').classList.add('hidden');
+                }, 500);
+            });
+        }
+
+        // Start app
+        init();
+    })();
+    </script>
+</body>
+</html>
