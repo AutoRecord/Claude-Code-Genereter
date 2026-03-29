@@ -51,6 +51,16 @@
             background: #0d5689;
         }
 
+        #depth-info {
+            color: #888;
+            font-size: 11px;
+            margin-left: 8px;
+            padding: 2px 8px;
+            background: #333;
+            border-radius: 3px;
+            user-select: none;
+        }
+
         #filename {
             color: #ccc;
             font-size: 13px;
@@ -112,6 +122,7 @@
             <button id="btn-open" title="Open .md file (Ctrl+O)">Open</button>
             <button id="btn-save" title="Save (Ctrl+S)">Save</button>
             <button id="btn-save-as" title="Save As (Ctrl+Shift+S)">Save As</button>
+            <span id="depth-info">深さ: 0</span>
             <span id="filename">Untitled.md</span>
         </div>
         <div id="workspace">
@@ -122,14 +133,12 @@
         </div>
     </div>
 
-    <!-- CDN Dependencies (load order is critical!) -->
+    <!-- CDN Dependencies -->
     <!-- 1. d3 MUST load before Monaco's AMD loader to avoid define.amd conflict -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
     <!-- 2. markmap-view: IIFE that reads global d3, writes to this.markmap -->
     <script src="https://cdn.jsdelivr.net/npm/markmap-view@0.18.12/dist/browser/index.js"></script>
-    <!-- 3. markmap-lib: IIFE that adds Transformer to this.markmap -->
-    <script src="https://cdn.jsdelivr.net/npm/markmap-lib@0.18.12/dist/browser/index.iife.js"></script>
-    <!-- 4. Monaco AMD loader (loaded last to prevent d3 UMD/AMD conflict) -->
+    <!-- 3. Monaco AMD loader (loaded last to prevent d3 UMD/AMD conflict) -->
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.min.js"></script>
 
     <script>
@@ -139,39 +148,175 @@
         // ---- State ----
         var editor = null;
         var markmapInstance = null;
-        var transformer = null;
         var currentFileHandle = null;
         var isDirty = false;
         var debounceTimer = null;
 
-        // ---- Default Content ----
+        // ---- Default Content (demonstrates deep nesting beyond 6 levels) ----
         var DEFAULT_MARKDOWN = [
-            '# Mind Map',
+            '# マインドマップ',
             '',
-            '## Topic A',
+            '## カテゴリA',
             '',
-            '### Sub-topic A1',
+            '### テーマ A1',
             '',
-            '### Sub-topic A2',
+            '#### 詳細 A1-1',
             '',
-            '## Topic B',
+            '##### 項目 A1-1-a',
             '',
-            '### Sub-topic B1',
+            '###### 補足 A1-1-a-i',
             '',
-            '### Sub-topic B2',
+            '####### レベル7: ← ここから拡張領域',
             '',
-            '## Topic C',
+            '######## レベル8',
+            '',
+            '######### レベル9',
+            '',
+            '########## レベル10',
+            '',
+            '##### 項目 A1-1-b',
+            '',
+            '#### 詳細 A1-2',
+            '',
+            '### テーマ A2',
+            '',
+            '## カテゴリB',
+            '',
+            '### テーマ B1',
+            '',
+            '### テーマ B2',
+            '',
+            '#### 詳細 B2-1',
+            '',
+            '##### 項目 B2-1-a',
+            '',
+            '###### 補足 B2-1-a-i',
+            '',
+            '####### レベル7',
+            '',
+            '######## レベル8',
+            '',
+            '## カテゴリC',
             ''
         ].join('\n');
 
-        // ---- File Picker Options ----
-        var FILE_PICKER_OPTIONS = {
-            types: [{
-                description: 'Markdown Files',
-                accept: { 'text/markdown': ['.md'] }
-            }],
-            excludeAcceptAllOption: false
-        };
+        // ================================================================
+        //  CUSTOM MARKDOWN PARSER — Unlimited heading depth (30+ levels)
+        //
+        //  Standard Markdown only supports # through ###### (H1–H6).
+        //  markmap-lib's Transformer enforces this limit.
+        //
+        //  This parser counts ANY number of leading '#' characters,
+        //  so "##########" is treated as depth 10, etc.
+        //  It also supports nested unordered/ordered list items
+        //  under any heading, adding further depth.
+        // ================================================================
+
+        /**
+         * Parse a Markdown string into a markmap-compatible tree.
+         * Returns { root: { content, children, depth } }
+         *
+         * Supports:
+         *   - Headings: unlimited '#' count (# = depth 1, ## = depth 2, … #####...# = depth N)
+         *   - List items: '-', '*', '+', '1.' etc. nested by indentation under headings
+         *   - Inline text between headings is appended to the last heading node's content
+         *
+         * @param {string} markdown  Raw markdown text
+         * @returns {{ root: object, maxDepth: number }}
+         */
+        function parseMarkdownToTree(markdown) {
+            if (!markdown || !markdown.trim()) {
+                return { root: { content: '', children: [], depth: 0 }, maxDepth: 0 };
+            }
+
+            var lines = markdown.split(/\r?\n/);
+            var root = { content: '', children: [], depth: 0 };
+            var maxDepth = 0;
+
+            // Stack of ancestor nodes, stack[i] is the current node at depth i
+            // stack[0] = root
+            var stack = [root];
+
+            // Regex for heading: one or more '#' at the start of line
+            var headingRegex = /^(#{1,99})\s+(.+)$/;
+
+            // Regex for list items: leading whitespace + list marker
+            var listRegex = /^(\s*)([-*+]|\d+[.)]) (.+)$/;
+
+            // Track if we're processing list items under a heading
+            var lastHeadingNode = null;
+            var listBaseDepth = 0;
+
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i];
+
+                // --- Check if it's a heading ---
+                var headingMatch = line.match(headingRegex);
+                if (headingMatch) {
+                    var depth = headingMatch[1].length;  // count of '#' characters
+                    var content = headingMatch[2].trim();
+
+                    if (depth > maxDepth) maxDepth = depth;
+
+                    var node = {
+                        content: content,
+                        children: [],
+                        depth: depth
+                    };
+
+                    // Find the correct parent: walk up the stack until we find
+                    // a node whose depth is strictly less than this one
+                    while (stack.length > 1 && stack[stack.length - 1].depth >= depth) {
+                        stack.pop();
+                    }
+
+                    // Append as child of the current top of stack
+                    stack[stack.length - 1].children.push(node);
+                    stack.push(node);
+
+                    // Reset list tracking
+                    lastHeadingNode = node;
+                    listBaseDepth = depth;
+
+                    continue;
+                }
+
+                // --- Check if it's a list item ---
+                var listMatch = line.match(listRegex);
+                if (listMatch && lastHeadingNode) {
+                    var indent = listMatch[1].length;
+                    var listContent = listMatch[3].trim();
+
+                    // Calculate list depth: 2 spaces or 1 tab per indent level
+                    var indentLevel = Math.floor(indent / 2);
+                    var listDepth = listBaseDepth + 1 + indentLevel;
+
+                    if (listDepth > maxDepth) maxDepth = listDepth;
+
+                    var listNode = {
+                        content: listContent,
+                        children: [],
+                        depth: listDepth
+                    };
+
+                    // Find correct parent in stack
+                    while (stack.length > 1 && stack[stack.length - 1].depth >= listDepth) {
+                        stack.pop();
+                    }
+
+                    stack[stack.length - 1].children.push(listNode);
+                    stack.push(listNode);
+
+                    continue;
+                }
+
+                // --- Empty line or non-heading/list text: ignore for tree structure ---
+                // (Could optionally append to last node's content, but markmap
+                //  typically only uses heading/list text for nodes)
+            }
+
+            return { root: root, maxDepth: maxDepth };
+        }
 
         // ---- Mindmap Rendering ----
         function renderMindmap(markdownText) {
@@ -179,23 +324,50 @@
                 if (markmapInstance) {
                     markmapInstance.setData({ content: '', children: [] });
                 }
+                updateDepthInfo(0);
                 return;
             }
 
             try {
-                var result = transformer.transform(markdownText);
+                var result = parseMarkdownToTree(markdownText);
                 var root = result.root;
+                var maxDepth = result.maxDepth;
+
+                updateDepthInfo(maxDepth);
+
+                // If the root has no content but has exactly one child,
+                // use that child as the visual root (common pattern: single # heading)
+                var displayRoot = root;
+                if (!root.content && root.children.length === 1) {
+                    displayRoot = root.children[0];
+                } else if (!root.content && root.children.length > 1) {
+                    // Multiple top-level headings: wrap them
+                    displayRoot = { content: 'Root', children: root.children, depth: 0 };
+                }
 
                 if (!markmapInstance) {
                     var Markmap = window.markmap.Markmap;
                     var svgEl = document.getElementById('markmap-svg');
-                    markmapInstance = Markmap.create(svgEl, undefined, root);
+                    markmapInstance = Markmap.create(svgEl, {
+                        /* markmap-view options */
+                        autoFit: true,
+                        duration: 300,
+                        maxWidth: 300
+                    }, displayRoot);
                 } else {
-                    markmapInstance.setData(root);
+                    markmapInstance.setData(displayRoot);
                     markmapInstance.fit();
                 }
             } catch (err) {
                 console.warn('Markmap render error:', err);
+            }
+        }
+
+        function updateDepthInfo(depth) {
+            var el = document.getElementById('depth-info');
+            if (el) {
+                el.textContent = '深さ: ' + depth + (depth > 6 ? ' (拡張)' : '');
+                el.style.color = depth > 6 ? '#4ec9b0' : '#888';
             }
         }
 
@@ -242,7 +414,13 @@
 
         async function openFileNative() {
             try {
-                var handles = await window.showOpenFilePicker(FILE_PICKER_OPTIONS);
+                var handles = await window.showOpenFilePicker({
+                    types: [{
+                        description: 'Markdown Files',
+                        accept: { 'text/markdown': ['.md'] }
+                    }],
+                    excludeAcceptAllOption: false
+                });
                 var handle = handles[0];
                 var file = await handle.getFile();
                 var text = await file.text();
@@ -303,7 +481,10 @@
             try {
                 var handle = await window.showSaveFilePicker({
                     suggestedName: getFileName(),
-                    types: FILE_PICKER_OPTIONS.types,
+                    types: [{
+                        description: 'Markdown Files',
+                        accept: { 'text/markdown': ['.md'] }
+                    }],
                     excludeAcceptAllOption: false
                 });
                 await saveToHandle(handle);
@@ -376,9 +557,6 @@
 
         // ---- Initialization ----
         function init() {
-            // markmap is already loaded via sync script tags
-            transformer = new window.markmap.Transformer();
-
             // Initialize Monaco Editor via AMD loader
             require.config({
                 paths: {
