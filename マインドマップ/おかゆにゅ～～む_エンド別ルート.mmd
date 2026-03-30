@@ -1,0 +1,98 @@
+%% おかゆにゅ～～む！ エンディング別ルート分類 (統合ツリー版)
+graph LR
+
+    classDef root fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4,font-weight:bold,font-size:16px
+    classDef choice fill:#313244,stroke:#cba6f7,stroke-width:1px,color:#e0dff0
+    classDef endNode fill:#f38ba8,stroke:#11111b,stroke-width:2px,color:#11111b,font-weight:bold
+
+    subgraph SG1 [ゲスズエンド・配信者エンド]
+        direction LR
+        S1_E(79↓ ゲスズエンド<br>80↑ 配信者エンド):::endNode
+        S1_E2(79↓ ゲスズエンド ※達成不可<br>80↑ 配信者エンド):::endNode
+
+        S1_1[シャツおでこ 💜💜]:::choice
+        
+        %% 卵味噌ふともも 経由
+        S1_1 --> S1_2A[卵味噌ふともも 💧💧]:::choice --> S1_3A[抱き寄せるあご 💜💜]:::choice --> S1_4A[大凶おなか 💧💧]:::choice --> S1_5A[ねぶた絵尻尾 💧💧]:::choice --> S1_6A[80おなか 💜💜]:::choice
+        S1_6A --> S1_7A[本鎖骨 💧💧]:::choice
+        S1_6A --> S1_7B[お布団ふともも 💜💜]:::choice --> S1_8B[製菓キットあご 💜💜]:::choice --> S1_E2
+
+        %% ぬいぐるみ耳 経由
+        S1_1 --> S1_2B[ぬいぐるみ耳 💜💜]:::choice
+        S1_2B --> S1_3B[飲み物手 💧💧]:::choice --> S1_4B[大吉はな 💜💜]:::choice
+        S1_2B --> S1_3C[抱き寄せるあご 💜💜]:::choice --> S1_4B
+        S1_4B --> S1_5B[手握り鉦頭 💜💜]:::choice --> S1_6B[バレンタインおなか 💜💜]:::choice
+        
+        S1_6B --> S1_7A
+        S1_6B --> S1_7C[お布団ふともも 💜💜]:::choice --> S1_8C[店売り肩 💧💧]:::choice --> S1_E
+
+        %% 合流先：本鎖骨から
+        S1_7A --> S1_8A[製菓キットあご 💜💜]:::choice --> S1_E
+    end
+
+    subgraph SG2 [バカップルエンド・観光大使エンド]
+        direction LR
+        S2_E(79↓ バカップルエンド<br>80↑ 観光大使エンド):::endNode
+        
+        S2_1[シャツおでこ 💜💜]:::choice
+        
+        %% 卵味噌 経由
+        S2_1 --> S2_2A[卵味噌ふともも 💧💧]:::choice --> S2_3A[抱き寄せるあご 💜💜]:::choice --> S2_4A[大凶おなか 💧💧]:::choice --> S2_5A[ねぶた絵尻尾 💧💧]:::choice --> S2_6A[80おなか 💜💜]:::choice
+        S2_6A --> S2_7A[本鎖骨 💧💧]:::choice
+        S2_7A --> S2_8A[店売り肩 💧💧]:::choice --> S2_E
+        S2_7A --> S2_8B[製菓肩 💜💧]:::choice --> S2_E
+        
+        S2_6A --> S2_7B[お布団ふともも 💜💜]:::choice
+
+        %% ぬいぐるみ耳 経由
+        S2_1 --> S2_2B[ぬいぐるみ耳 💜💜]:::choice --> S2_3B[飲み物手 💧💧]:::choice --> S2_4B[大吉はな 💜💜]:::choice --> S2_5B[手握り鉦頭 💜💜]:::choice --> S2_6B[バレンタイン頬 💜💧]:::choice --> S2_7B
+
+        %% 合流先：お布団ふとももから
+        S2_7B --> S2_8C[店売り肩 💧💧]:::choice --> S2_E
+    end
+
+    subgraph SG3 [スイーツ屋エンド]
+        direction LR
+        S3_E(スイーツ屋エンド):::endNode
+
+        S3_1A[シャツおでこ 💜💜]:::choice
+        S3_1B[布団二の腕 💧💧]:::choice
+        S3_1C[シャツ二の腕 💧💧]:::choice
+
+        %% シャツおでこ 経由
+        S3_1A --> S3_2A[ぬいぐるみ耳 💜💜]:::choice
+        S3_2A --> S3_3A[飲み物手 💧💧]:::choice --> S3_4A[大吉はな 💜💜]:::choice
+        S3_2A --> S3_3B[抱き寄せるあご 💜💜]:::choice --> S3_4A
+        
+        S3_4A --> S3_5A[手握り鉦頭 💜💜]:::choice
+        S3_4A --> S3_5B[手握り鉦頭 💜💧]:::choice
+
+        %% 布団二の腕 経由
+        S3_1B --> S3_2B[卵味噌ふともも 💧💧]:::choice
+        S3_1B --> S3_2C[ぬいぐるみ耳 💜💜]:::choice --> S3_3C[抱き寄せるあご 💜💜]:::choice
+        
+        S3_2B --> S3_3D[飲み物手 💧💧]:::choice --> S3_4B[大凶おなか 💧💧]:::choice
+        S3_2B --> S3_3C
+        S3_3C --> S3_4B
+        
+        S3_4B --> S3_5C[ねぶた絵尻尾 💧💧]:::choice
+        
+        %% スイーツ屋合流：おにぎり頬
+        S3_5A --> S3_6A[おにぎり頬 💧💧]:::choice
+        S3_5B --> S3_6A
+        S3_5C --> S3_6A
+        S3_6A --> S3_E
+
+        %% スイーツ屋合流：バレンタインおなか
+        S3_5A --> S3_6B[バレンタインおなか 💜💜]:::choice
+        S3_5C --> S3_6B
+        S3_6B --> S3_E
+
+        %% シャツ二の腕 経由
+        S3_1C --> S3_2D[クイズ1正解]:::choice --> S3_3E[ぬいぐるみふともも 💜💧]:::choice --> S3_4C[抱き寄せる手 💧💧]:::choice --> S3_5D[大吉おなか 💧💧]:::choice --> S3_6C[手握り鉦尻尾 💧💧]:::choice --> S3_7A[バレンタイン頬 💜💧]:::choice --> S3_E
+    end
+
+    subgraph SG4 [巫女エンド]
+        direction LR
+        S4_1[シャツ二の腕 💧💧]:::choice --> S4_2[クイズ1不正解]:::choice --> S4_3[ぬいぐるみふともも 💜💧]:::choice --> S4_4[抱き寄せる手 💧💧]:::choice --> S4_5[なでなで放置]:::choice --> S4_6[おかにゃん]:::choice --> S4_E(巫女エンド):::endNode
+    end
