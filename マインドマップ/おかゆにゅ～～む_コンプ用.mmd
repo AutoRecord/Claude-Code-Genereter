@@ -1,0 +1,190 @@
+%% おかゆにゅ～～む！R コンプリート用（全パターン網羅）フローチャート
+graph LR
+
+    classDef root fill:#1e1e2e,stroke:#89b4fa,stroke-width:2px,color:#cdd6f4,font-weight:bold,font-size:16px
+    classDef choice fill:#313244,stroke:#cba6f7,stroke-width:1px,color:#e0dff0
+    classDef check fill:#181825,stroke:#a6e3a1,stroke-width:2px,color:#a6e3a1,stroke-dasharray: 4 4
+
+    subgraph P1 [第1フェーズ：にゃふにゃふT 全18パターン]
+        direction LR
+        P1_root(アイテム):::root
+
+        P1_root --> P1_root_0[布団]:::choice
+        P1_root_0 --> P1_root_0_0[おでこ]:::choice
+        P1_root_0_0 --> L_1["[ 回収：　　　 ] 紅葉狩り【きのこ】"]:::check
+        P1_root_0_0 --> L_2["[ 回収：　　　 ] 紅葉狩り【どんぐり】"]:::check
+        P1_root_0_0 --> L_3["[ 回収：　　　 ] リンゴ狩り"]:::check
+        P1_root_0 --> P1_root_0_1[にのうで]:::choice
+        P1_root_0_1 --> L_4["[ 回収：　　　 ] 紅葉狩り【きのこ】"]:::check
+        P1_root_0_1 --> L_5["[ 回収：　　　 ] 紅葉狩り【どんぐり】"]:::check
+        P1_root_0_1 --> L_6["[ 回収：　　　 ] リンゴ狩り"]:::check
+        P1_root --> P1_root_1[シャツ]:::choice
+        P1_root_1 --> P1_root_1_0[おでこ]:::choice
+        P1_root_1_0 --> L_7["[ 回収：　　　 ] 紅葉狩り【きのこ】"]:::check
+        P1_root_1_0 --> L_8["[ 回収：　　　 ] 紅葉狩り【どんぐり】"]:::check
+        P1_root_1_0 --> L_9["[ 回収：　　　 ] リンゴ狩り"]:::check
+        P1_root_1 --> P1_root_1_1[にのうで]:::choice
+        P1_root_1_1 --> L_10["[ 回収：　　　 ] 紅葉狩り【きのこ】"]:::check
+        P1_root_1_1 --> L_11["[ 回収：　　　 ] 紅葉狩り【どんぐり】"]:::check
+        P1_root_1_1 --> L_12["[ 回収：　　　 ] リンゴ狩り"]:::check
+        P1_root --> P1_root_2[野球拳]:::choice
+        P1_root_2 --> P1_root_2_0[おでこ]:::choice
+        P1_root_2_0 --> L_13["[ 回収：　　　 ] 紅葉狩り【きのこ】"]:::check
+        P1_root_2_0 --> L_14["[ 回収：　　　 ] 紅葉狩り【どんぐり】"]:::check
+        P1_root_2_0 --> L_15["[ 回収：　　　 ] リンゴ狩り"]:::check
+        P1_root_2 --> P1_root_2_1[にのうで]:::choice
+        P1_root_2_1 --> L_16["[ 回収：　　　 ] 紅葉狩り【きのこ】"]:::check
+        P1_root_2_1 --> L_17["[ 回収：　　　 ] 紅葉狩り【どんぐり】"]:::check
+        P1_root_2_1 --> L_18["[ 回収：　　　 ] リンゴ狩り"]:::check
+    end
+
+    subgraph P2 [第2フェーズ：クイズ＆探索 全6パターン]
+        direction LR
+        P2_root(行き先):::root
+
+        P2_root --> P2_root_0[酸ヶ湯]:::choice
+        P2_root_0 --> P2_root_0_0[たまご味噌]:::choice
+        P2_root_0_0 --> L_19["[ 回収：　　　 ] みみ"]:::check
+        P2_root_0_0 --> L_20["[ 回収：　　　 ] ふともも"]:::check
+        P2_root --> P2_root_1[青森市]:::choice
+        P2_root_1 --> P2_root_1_0[たまご味噌]:::choice
+        P2_root_1_0 --> L_21["[ 回収：　　　 ] みみ"]:::check
+        P2_root_1_0 --> L_22["[ 回収：　　　 ] ふともも"]:::check
+        P2_root --> P2_root_2[八戸市]:::choice
+        P2_root_2 --> P2_root_2_0[たまご味噌]:::choice
+        P2_root_2_0 --> L_23["[ 回収：　　　 ] みみ"]:::check
+        P2_root_2_0 --> L_24["[ 回収：　　　 ] ふともも"]:::check
+    end
+
+    subgraph P3 [第3フェーズ：ASMR 全3パターン]
+        direction LR
+        P3_root(プラン):::root
+
+        P3_root --> L_25["[ 回収：　　　 ] 津軽鉄道【車内】"]:::check
+        P3_root --> L_26["[ 回収：　　　 ] 津軽鉄道【車外】"]:::check
+        P3_root --> L_27["[ 回収：　　　 ] 市場"]:::check
+    end
+
+    subgraph P4 [第4フェーズ：にゃふにゃふ中盤 全4パターン]
+        direction LR
+        P4_root(スキンシップ):::root
+
+        P4_root --> P4_root_0[抱き寄せる]:::choice
+        P4_root_0 --> L_28["[ 回収：　　　 ] あご"]:::check
+        P4_root_0 --> L_29["[ 回収：　　　 ] 手"]:::check
+        P4_root --> P4_root_1[飲み物差し入れ]:::choice
+        P4_root_1 --> L_30["[ 回収：　　　 ] あご"]:::check
+        P4_root_1 --> L_31["[ 回収：　　　 ] 手"]:::check
+    end
+
+    subgraph P5 [第5フェーズ：おかゆなでなで 全12パターン]
+        direction LR
+        P5_root(おみくじ):::root
+
+        P5_root --> P5_root_0[左のおみくじ]:::choice
+        P5_root_0 --> P5_root_0_0[はな]:::choice
+        P5_root_0_0 --> L_32["[ 回収：　　　 ] 氷爆【五目並べ】"]:::check
+        P5_root_0_0 --> L_33["[ 回収：　　　 ] 氷爆【TVゲーム】"]:::check
+        P5_root_0_0 --> L_34["[ 回収：　　　 ] 水族館"]:::check
+        P5_root_0 --> P5_root_0_1[おなか]:::choice
+        P5_root_0_1 --> L_35["[ 回収：　　　 ] 氷爆【五目並べ】"]:::check
+        P5_root_0_1 --> L_36["[ 回収：　　　 ] 氷爆【TVゲーム】"]:::check
+        P5_root_0_1 --> L_37["[ 回収：　　　 ] 水族館"]:::check
+        P5_root --> P5_root_1[右のおみくじ]:::choice
+        P5_root_1 --> P5_root_1_0[はな]:::choice
+        P5_root_1_0 --> L_38["[ 回収：　　　 ] 氷爆【五目並べ】"]:::check
+        P5_root_1_0 --> L_39["[ 回収：　　　 ] 氷爆【TVゲーム】"]:::check
+        P5_root_1_0 --> L_40["[ 回収：　　　 ] 水族館"]:::check
+        P5_root_1 --> P5_root_1_1[おなか]:::choice
+        P5_root_1_1 --> L_41["[ 回収：　　　 ] 氷爆【五目並べ】"]:::check
+        P5_root_1_1 --> L_42["[ 回収：　　　 ] 氷爆【TVゲーム】"]:::check
+        P5_root_1_1 --> L_43["[ 回収：　　　 ] 水族館"]:::check
+    end
+
+    subgraph P6 [第6フェーズ：にゃふにゃふ後半1 全12パターン]
+        direction LR
+        P6_root(アイテム):::root
+
+        P6_root --> P6_root_0[手振り鉦]:::choice
+        P6_root_0 --> P6_root_0_0[頭]:::choice
+        P6_root_0_0 --> L_44["[ 回収：　　　 ] 樹氷【見に行く】"]:::check
+        P6_root_0_0 --> L_45["[ 回収：　　　 ] 樹氷【一休み】"]:::check
+        P6_root_0_0 --> L_46["[ 回収：　　　 ] ウィンタースポーツ"]:::check
+        P6_root_0 --> P6_root_0_1[尻尾]:::choice
+        P6_root_0_1 --> L_47["[ 回収：　　　 ] 樹氷【見に行く】"]:::check
+        P6_root_0_1 --> L_48["[ 回収：　　　 ] 樹氷【一休み】"]:::check
+        P6_root_0_1 --> L_49["[ 回収：　　　 ] ウィンタースポーツ"]:::check
+        P6_root --> P6_root_1[ねぶた絵]:::choice
+        P6_root_1 --> P6_root_1_0[頭]:::choice
+        P6_root_1_0 --> L_50["[ 回収：　　　 ] 樹氷【見に行く】"]:::check
+        P6_root_1_0 --> L_51["[ 回収：　　　 ] 樹氷【一休み】"]:::check
+        P6_root_1_0 --> L_52["[ 回収：　　　 ] ウィンタースポーツ"]:::check
+        P6_root_1 --> P6_root_1_1[尻尾]:::choice
+        P6_root_1_1 --> L_53["[ 回収：　　　 ] 樹氷【見に行く】"]:::check
+        P6_root_1_1 --> L_54["[ 回収：　　　 ] 樹氷【一休み】"]:::check
+        P6_root_1_1 --> L_55["[ 回収：　　　 ] ウィンタースポーツ"]:::check
+    end
+
+    subgraph P7_A [第7フェーズ：撮影タイムA 全12パターン]
+        direction LR
+        P7_A_root(アイテム):::root
+
+        P7_A_root --> P7_A_root_0[バレンタイン]:::choice
+        P7_A_root_0 --> P7_A_root_0_0[おなか]:::choice
+        P7_A_root_0_0 --> L_56["[ 回収：　　　 ] ピース【顔】"]:::check
+        P7_A_root_0_0 --> L_57["[ 回収：　　　 ] ネコ【尻尾】"]:::check
+        P7_A_root_0_0 --> L_58["[ 回収：　　　 ] ハート【胸】"]:::check
+        P7_A_root_0 --> P7_A_root_0_1[頬]:::choice
+        P7_A_root_0_1 --> L_59["[ 回収：　　　 ] ピース【顔】"]:::check
+        P7_A_root_0_1 --> L_60["[ 回収：　　　 ] ネコ【尻尾】"]:::check
+        P7_A_root_0_1 --> L_61["[ 回収：　　　 ] ハート【胸】"]:::check
+        P7_A_root --> P7_A_root_1[おにぎり]:::choice
+        P7_A_root_1 --> P7_A_root_1_0[おなか]:::choice
+        P7_A_root_1_0 --> L_62["[ 回収：　　　 ] ピース【顔】"]:::check
+        P7_A_root_1_0 --> L_63["[ 回収：　　　 ] ネコ【尻尾】"]:::check
+        P7_A_root_1_0 --> L_64["[ 回収：　　　 ] ハート【胸】"]:::check
+        P7_A_root_1 --> P7_A_root_1_1[頬]:::choice
+        P7_A_root_1_1 --> L_65["[ 回収：　　　 ] ピース【顔】"]:::check
+        P7_A_root_1_1 --> L_66["[ 回収：　　　 ] ネコ【尻尾】"]:::check
+        P7_A_root_1_1 --> L_67["[ 回収：　　　 ] ハート【胸】"]:::check
+    end
+
+    subgraph P7_B [第7フェーズ：お布団スキンシップ 全4パターン]
+        direction LR
+        P7_B_root(アイテム):::root
+
+        P7_B_root --> P7_B_root_0[お布団]:::choice
+        P7_B_root_0 --> L_68["[ 回収：　　　 ] ふともも"]:::check
+        P7_B_root_0 --> L_69["[ 回収：　　　 ] 鎖骨"]:::check
+        P7_B_root --> P7_B_root_1[妹モノの本]:::choice
+        P7_B_root_1 --> L_70["[ 回収：　　　 ] ふともも"]:::check
+        P7_B_root_1 --> L_71["[ 回収：　　　 ] 鎖骨"]:::check
+    end
+
+    subgraph P7_C [第7フェーズ：製菓スキンシップ 全4パターン]
+        direction LR
+        P7_C_root(アイテム):::root
+
+        P7_C_root --> P7_C_root_0[製菓キット]:::choice
+        P7_C_root_0 --> L_72["[ 回収：　　　 ] あご"]:::check
+        P7_C_root_0 --> L_73["[ 回収：　　　 ] 肩"]:::check
+        P7_C_root --> P7_C_root_1[チョコの箱]:::choice
+        P7_C_root_1 --> L_74["[ 回収：　　　 ] あご"]:::check
+        P7_C_root_1 --> L_75["[ 回収：　　　 ] 肩"]:::check
+    end
+
+    subgraph P8 [第8フェーズ：クライマックス 全6パターン]
+        direction LR
+        P8_root(お風呂の味):::root
+
+        P8_root --> P8_root_0[抹茶]:::choice
+        P8_root_0 --> L_76["[ 回収：　　　 ] 腹"]:::check
+        P8_root_0 --> L_77["[ 回収：　　　 ] ペロ"]:::check
+        P8_root --> P8_root_1[チョコ]:::choice
+        P8_root_1 --> L_78["[ 回収：　　　 ] 腹"]:::check
+        P8_root_1 --> L_79["[ 回収：　　　 ] ペロ"]:::check
+        P8_root --> P8_root_2[バニラ]:::choice
+        P8_root_2 --> L_80["[ 回収：　　　 ] 腹"]:::check
+        P8_root_2 --> L_81["[ 回収：　　　 ] ペロ"]:::check
+    end
+
