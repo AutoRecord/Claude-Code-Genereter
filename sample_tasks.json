@@ -1,0 +1,81 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "name": "要件定義",
+      "start": "2026-04-01",
+      "end": "2026-04-07",
+      "assignee": "田中",
+      "status": "完了",
+      "priority": "高",
+      "progress": 100,
+      "group": "企画",
+      "note": "顧客ヒアリング完了"
+    },
+    {
+      "id": 2,
+      "name": "基本設計",
+      "start": "2026-04-06",
+      "end": "2026-04-14",
+      "assignee": "鈴木",
+      "status": "進行中",
+      "priority": "高",
+      "progress": 60,
+      "group": "企画",
+      "depends_on": [1],
+      "note": "DB設計レビュー待ち"
+    },
+    {
+      "id": 3,
+      "name": "詳細設計",
+      "start": "2026-04-13",
+      "end": "2026-04-22",
+      "assignee": "佐藤",
+      "status": "未着手",
+      "priority": "中",
+      "progress": 0,
+      "group": "企画",
+      "depends_on": [2],
+      "note": ""
+    },
+    {
+      "id": 4,
+      "name": "フロントエンド開発",
+      "start": "2026-04-20",
+      "end": "2026-05-01",
+      "assignee": "高橋",
+      "status": "未着手",
+      "priority": "高",
+      "progress": 0,
+      "group": "開発",
+      "depends_on": [3],
+      "note": "React + TypeScript"
+    },
+    {
+      "id": 5,
+      "name": "バックエンド開発",
+      "start": "2026-04-22",
+      "end": "2026-05-08",
+      "assignee": "伊藤",
+      "status": "未着手",
+      "priority": "高",
+      "progress": 0,
+      "group": "開発",
+      "depends_on": [3],
+      "note": "API設計書参照"
+    },
+    {
+      "id": 6,
+      "name": "★ 本番リリース",
+      "start": "2026-05-28",
+      "end": "2026-05-28",
+      "assignee": "全員",
+      "status": "未着手",
+      "priority": "最高",
+      "progress": 0,
+      "group": "リリース",
+      "depends_on": [4, 5],
+      "note": "マイルストーン"
+    }
+  ]
+}
